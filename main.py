@@ -25,7 +25,7 @@ def start_the_process():
     returns None
     """
     global driver
-    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1.html')
+    driver.get(DOLATKHANI_LINK)
     name_last_name = name_and_last_name_entry.get()
     phone_number = phone_number_entry.get()
     window.destroy()
@@ -48,8 +48,6 @@ def start_the_process():
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
 
-    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
-
     wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
     driver.execute_script("window.stop();")
 
@@ -61,11 +59,6 @@ def start_the_process():
             available_times.append(available_time)
     # Clicks a random appointment time
     choice(available_times).click()
-
-    # Temporary
-    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
-               r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
-               r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
 
     wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
     driver.execute_script("window.stop();")
