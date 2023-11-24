@@ -16,6 +16,7 @@ option.page_load_strategy = "none"
 driver = webdriver.Chrome(service=ser, options=option)
 wait = WebDriverWait(driver, 20)
 
+# TODO: Add the second website in
 DOLATKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 
 
@@ -71,6 +72,7 @@ def start_the_process():
     driver.execute_script("window.stop();")
 
     # Enters the name, last name also the phone number and puts focus on the captcha input for user input
+    # TODO: figure out how you wanna approach Captcha
     name_input = driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
     name_input.clear()
     name_input.send_keys(name_last_name)
@@ -124,6 +126,7 @@ phone_number_entry.grid(row=1, column=0)
 number_of_appointment_label = ttk.Label(text="تعداد نوبت ها", padding=10, justify="right")
 number_of_appointment_label.grid(row=2, column=1)
 
+# TODO: add this functionality currently does nothing
 number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
 number_of_appointment_entry.grid(row=2, column=0)
 
