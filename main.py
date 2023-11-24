@@ -4,18 +4,16 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, NoSuchWindowException
+from selenium.common.exceptions import NoSuchElementException
 import ttkbootstrap as ttk
 from random import choice
-import sys
-
 
 webdriver_path = r"chromedriver.exe"
 ser = service.Service(executable_path=webdriver_path)
 option = Options()
+option.add_experimental_option("detach", True)
 option.page_load_strategy = "none"
 driver = webdriver.Chrome(service=ser, options=option)
-
 wait = WebDriverWait(driver, 20)
 
 DOLATKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
@@ -24,11 +22,12 @@ DOLATKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 # Starts the code and opens the webpage
 def start_the_process():
     global driver
-    driver.get(DOLATKHANI_LINK)
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1.html')
     name_last_name = name_and_last_name_entry.get()
     phone_number = phone_number_entry.get()
     window.destroy()
     while True:
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, r'bookly-box')))
         try:
             driver.find_element(By.CSS_SELECTOR, "option[value = '0']")
             break
@@ -41,6 +40,7 @@ def start_the_process():
     select_element.select_by_value('1')
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
     driver.execute_script("window.stop();")
     book_column = driver.find_element(By.CLASS_NAME, r'bookly-column')
@@ -49,6 +49,9 @@ def start_the_process():
         if available_time.is_enabled():
             available_times.append(available_time)
     choice(available_times).click()
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
+               r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
+               r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
     driver.execute_script("window.stop();")
     name_input = driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
@@ -57,6 +60,8 @@ def start_the_process():
     phone_number_input = driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
     phone_number_input.clear()
     phone_number_input.send_keys(phone_number)
+    captcha_input = driver.find_element(By.CLASS_NAME, r'bookly-captcha')
+    captcha_input.click()
 
 
 def validate_phone_number(x) -> bool:
