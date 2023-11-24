@@ -32,7 +32,7 @@ def start_the_process():
     window.destroy()
     # Refreshes the window until it can start
     while True:
-        wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-box')))
+        wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
         try:
             driver.find_element(By.CSS_SELECTOR, "option[value = '0']")
             break
