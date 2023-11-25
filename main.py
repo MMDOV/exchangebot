@@ -22,12 +22,12 @@ DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 
 
-def main(name_last_name, phone_number):
+def main(name_last_name, phone_number, the_link):
     """
     The main process!
     returns None
     """
-    driver.get(DOLKHANI_LINK)
+    driver.get(the_link)
     # Refreshes the window until it can start
     while True:
         try:
@@ -129,27 +129,28 @@ def get_all_the_info():
         phone_number_entry.grid(row=1, column=i)
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
-    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=lambda: iterate_through(all_info, var=var))
+    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
+                              command=lambda: iterate_through(all_info, variable=var))
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
     window.mainloop()
 
 
-def iterate_through(information, var):
+def iterate_through(information, variable):
     """
     iterates through the list of info and gets an appointment for each one
+    :param variable: the radio button variable that determines which link to be used
     :param information: all the information including names and phone numbers
     :return: None
     """
-    global the_link
     i = 0
     information.reverse()
-    if var == 1:
+    if variable == 1:
         the_link = DOLKHANI_LINK
-    elif var == 2:
+    else:
         the_link = ARYA_LINK
     for info in information:
-        main(name_last_name=info[0].get(), phone_number=info[1].get())
+        main(name_last_name=info[0].get(), phone_number=info[1].get(), the_link=the_link)
         driver.switch_to.window(driver.window_handles[i + 1])
         i += 1
 
