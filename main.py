@@ -20,16 +20,12 @@ wait = WebDriverWait(driver, 20)
 DOLATKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 
 
-def start_the_process():
+def main(name_last_name, phone_number):
     """
-    Does Everything!
+    The main process!
     returns None
     """
-    global driver
     driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1.html')
-    name_last_name = name_and_last_name_entry.get()
-    phone_number = phone_number_entry.get()
-    window.destroy()
     # Refreshes the window until it can start
     while True:
         try:
@@ -84,7 +80,6 @@ def start_the_process():
     driver.execute_script("window.stop();")
 
     # Enters the name, last name also the phone number and puts focus on the captcha input for user input
-    # TODO: figure out how you wanna approach Captcha
     name_input = driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
     name_input.clear()
     name_input.send_keys(name_last_name)
@@ -93,6 +88,21 @@ def start_the_process():
     phone_number_input.send_keys(phone_number)
     captcha_input = driver.find_element(By.CLASS_NAME, r'bookly-captcha')
     captcha_input.click()
+    wait.until(ec.new_window_is_opened(driver.window_handles))
+
+
+def iterate_through_main():
+    """
+    gets the info from UI and goes through the process for "number of appointment" amount of times
+    :return: None
+    """
+    amount = number_of_appointment_entry.get()
+    name_last_name = name_and_last_name_entry.get()
+    phone_number = phone_number_entry.get()
+    window.destroy()
+    for i in range(int(amount)):
+        main(name_last_name=name_last_name, phone_number=phone_number)
+        driver.switch_to.window(driver.window_handles[i + 1])
 
 
 def validate_phone_number(x) -> bool:
@@ -138,11 +148,10 @@ phone_number_entry.grid(row=1, column=0)
 number_of_appointment_label = ttk.Label(text="تعداد نوبت ها", padding=10, justify="right")
 number_of_appointment_label.grid(row=2, column=1)
 
-# TODO: add this functionality currently does nothing
 number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
 number_of_appointment_entry.grid(row=2, column=0)
 
-button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=start_the_process)
+button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=iterate_through_main)
 button.config(padding=10)
 button.grid(row=3, column=0, columnspan=2)
 
