@@ -16,7 +16,7 @@ option.page_load_strategy = "none"
 driver = webdriver.Chrome(service=ser, options=option)
 wait = WebDriverWait(driver, 20)
 
-# TODO: Add the second website in
+# TODO: test the second website
 # TODO: multi threading / processing needed to be added if possible
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
@@ -35,16 +35,15 @@ def main(name_last_name, phone_number, the_link):
             driver.find_element(By.CSS_SELECTOR, "option[value = '0']")
             break
         except NoSuchElementException:
-            driver.refresh()
+            continue
         except TimeoutException:
-            driver.refresh()
+            continue
 
     wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
     driver.execute_script("window.stop();")
 
     # Picks "نوبت دهی" and clicks "بعدی"
-    select_element = Select(driver.find_element(By.XPATH, r"/html/body/div[1]/div/div[2]/div/div/article/div/div/div["
-                                                          r"2]/div[2]/div[1]/div/div/div/select"))
+    select_element = Select(driver.find_element(By.TAG_NAME, "select"))
     select_element.select_by_value('1')
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
