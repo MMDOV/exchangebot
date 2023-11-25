@@ -126,9 +126,9 @@ def get_all_the_info():
     new_window.config(pady=20, padx=20)
     phone_number_func = new_window.register(validate_phone_number)
     name_and_last_name_label = ttk.Label(text="نام و نام خانوادگی ", padding=10, justify="right")
-    name_and_last_name_label.grid(row=0, column=0)
+    name_and_last_name_label.grid(row=0, column=amount + 1)
     phone_number_label = ttk.Label(text="شماره موبایل", padding=10, justify="right")
-    phone_number_label.grid(row=1, column=0)
+    phone_number_label.grid(row=1, column=amount + 1)
     for i in range(amount):
         name_and_last_name_entry = ttk.Entry(width=20, justify="right")
         name_and_last_name_entry.grid(row=0, column=i + 1)
@@ -140,6 +140,7 @@ def get_all_the_info():
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=lambda: iterate_through(all_info))
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
+    new_window.mainloop()
 
 
 def iterate_through(information):
