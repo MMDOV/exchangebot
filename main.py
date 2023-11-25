@@ -19,6 +19,7 @@ wait = WebDriverWait(driver, 20)
 # TODO: Add the second website in
 # TODO: multi threading / processing needed to be added if possible
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
+ARYA_LINK = r'https://exarya.ir/appointment/'
 
 
 def main(name_last_name, phone_number):
@@ -119,7 +120,7 @@ def get_all_the_info():
     """
     all_info = []
     amount = int(number_of_appointment_entry.get())
-    # sarafi = var.get()
+    sarafi = var.get()
     for widget in window.winfo_children():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
@@ -135,20 +136,25 @@ def get_all_the_info():
         phone_number_entry.grid(row=1, column=i)
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
-    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=lambda: iterate_through(all_info))
+    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=lambda: iterate_through(all_info, var=var))
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
     window.mainloop()
 
 
-def iterate_through(information):
+def iterate_through(information, var):
     """
     iterates through the list of info and gets an appointment for each one
     :param information: all the information including names and phone numbers
     :return: None
     """
+    global the_link
     i = 0
     information.reverse()
+    if var == 1:
+        the_link = DOLKHANI_LINK
+    elif var == 2:
+        the_link = ARYA_LINK
     for info in information:
         main(name_last_name=info[0].get(), phone_number=info[1].get())
         driver.switch_to.window(driver.window_handles[i + 1])
