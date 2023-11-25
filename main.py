@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import ttkbootstrap as ttk
 from random import choice
 
@@ -32,11 +32,13 @@ def start_the_process():
     window.destroy()
     # Refreshes the window until it can start
     while True:
-        wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
         try:
+            wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
             driver.find_element(By.CSS_SELECTOR, "option[value = '0']")
             break
         except NoSuchElementException:
+            driver.refresh()
+        except TimeoutException:
             driver.refresh()
 
     wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
@@ -51,7 +53,12 @@ def start_the_process():
 
     driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
 
-    wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
+    while True:
+        try:
+            wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
+            break
+        except TimeoutException:
+            continue
     driver.execute_script("window.stop();")
 
     # Gets all the available appointment times and puts them in a list
@@ -68,7 +75,12 @@ def start_the_process():
                r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
                r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
 
-    wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
+    while True:
+        try:
+            wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
+            break
+        except TimeoutException:
+            continue
     driver.execute_script("window.stop();")
 
     # Enters the name, last name also the phone number and puts focus on the captcha input for user input
