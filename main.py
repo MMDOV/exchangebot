@@ -113,27 +113,25 @@ def get_all_the_info():
     all_info = []
     amount = int(number_of_appointment_entry.get())
     # sarafi = var.get()
-    window.destroy()
-    new_window = ttk.Window()
-    new_window.title("ربات گرفتن نوبت صرافی")
-    new_window.config(pady=20, padx=20)
-    phone_number_func = new_window.register(validate_phone_number)
+    for widget in window.winfo_children():
+        widget.destroy()
+    phone_number_func = window.register(validate_phone_number)
     name_and_last_name_label = ttk.Label(text="نام و نام خانوادگی ", padding=10, justify="right")
     name_and_last_name_label.grid(row=0, column=amount + 1)
     phone_number_label = ttk.Label(text="شماره موبایل", padding=10, justify="right")
     phone_number_label.grid(row=1, column=amount + 1)
     for i in range(amount):
         name_and_last_name_entry = ttk.Entry(width=20, justify="right")
-        name_and_last_name_entry.grid(row=0, column=i + 1)
+        name_and_last_name_entry.grid(row=0, column=i)
 
         phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
-        phone_number_entry.grid(row=1, column=i + 1)
+        phone_number_entry.grid(row=1, column=i)
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=lambda: iterate_through(all_info))
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
-    new_window.mainloop()
+    window.mainloop()
 
 
 def iterate_through(information):
@@ -143,6 +141,7 @@ def iterate_through(information):
     :return: None
     """
     i = 0
+    information.reverse()
     for info in information:
         main(name_last_name=info[0].get(), phone_number=info[1].get())
         driver.switch_to.window(driver.window_handles[i + 1])
