@@ -16,7 +16,7 @@ option.page_load_strategy = "none"
 driver = webdriver.Chrome(service=ser, options=option)
 wait = WebDriverWait(driver, 20)
 
-# TODO: Add the second website in
+# TODO: test the second website
 # TODO: multi threading / processing needed to be added if possible
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
@@ -34,7 +34,7 @@ def main(name_last_name, phone_number):
             wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
             driver.find_element(By.TAG_NAME, "img")  # TODO: needs to be replaced with the loading icon gif
             break
-        # TODO: fix this so it doesnt refresh when the loading icon appears
+        # TODO: fix this so it doesnt refresh when the loading icon appears kind of the same thing as the one above
         except NoSuchElementException:
             driver.refresh()
         except TimeoutException:
@@ -163,6 +163,8 @@ def iterate_through(information, var):
 
 
 # ----------------------------------------------UI------------------------------------------------ #
+# TODO: make it so you can select and run both websites at the same time
+#  (probably needs multithreading or multiprocessing)
 window = ttk.Window()
 window.title("ربات گرفتن نوبت صرافی")
 window.config(pady=20, padx=40)
