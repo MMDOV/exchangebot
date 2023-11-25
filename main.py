@@ -32,8 +32,9 @@ def main(name_last_name, phone_number, the_link):
     while True:
         try:
             wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
-            driver.find_element(By.CSS_SELECTOR, "option[value = '0']")
+            driver.find_element(By.TAG_NAME, "img")  # TODO: needs to be replaced with the loading icon gif
             break
+        # TODO: fix this so it doesnt refresh when the loading icon appears kind of the same thing as the one above
         except NoSuchElementException:
             continue
         except TimeoutException:
@@ -130,6 +131,7 @@ def get_all_the_info():
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
                               command=lambda: iterate_through(all_info, variable=var))
+
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
     window.mainloop()
@@ -155,6 +157,8 @@ def iterate_through(information, variable):
 
 
 # ----------------------------------------------UI------------------------------------------------ #
+# TODO: make it so you can select and run both websites at the same time
+#  (probably needs multithreading or multiprocessing)
 window = ttk.Window()
 window.title("ربات گرفتن نوبت صرافی")
 window.config(pady=20, padx=40)
