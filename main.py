@@ -32,8 +32,9 @@ def main(name_last_name, phone_number):
     while True:
         try:
             wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
-            driver.find_element(By.CSS_SELECTOR, "option[value = '0']")
+            driver.find_element(By.TAG_NAME, "img")  # TODO: needs to be replaced with the loading icon gif
             break
+        # TODO: fix this so it doesnt refresh when the loading icon appears
         except NoSuchElementException:
             driver.refresh()
         except TimeoutException:
@@ -43,8 +44,7 @@ def main(name_last_name, phone_number):
     driver.execute_script("window.stop();")
 
     # Picks "نوبت دهی" and clicks "بعدی"
-    select_element = Select(driver.find_element(By.XPATH, r"/html/body/div[1]/div/div[2]/div/div/article/div/div/div["
-                                                          r"2]/div[2]/div[1]/div/div/div/select"))
+    select_element = Select(driver.find_element(By.TAG_NAME, "select"))
     select_element.select_by_value('1')
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
@@ -136,7 +136,8 @@ def get_all_the_info():
         phone_number_entry.grid(row=1, column=i)
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
-    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark', command=lambda: iterate_through(all_info, var=var))
+    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
+                              command=lambda: iterate_through(all_info, var=var))
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
     window.mainloop()
