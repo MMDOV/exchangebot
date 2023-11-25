@@ -22,12 +22,12 @@ DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 
 
-def main(name_last_name, phone_number, the_link):
+def main(name_last_name, phone_number):
     """
     The main process!
     returns None
     """
-    driver.get(the_link)
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1.html')
     # Refreshes the window until it can start
     while True:
         try:
@@ -36,9 +36,9 @@ def main(name_last_name, phone_number, the_link):
             break
         # TODO: fix this so it doesnt refresh when the loading icon appears kind of the same thing as the one above
         except NoSuchElementException:
-            continue
+            driver.refresh()
         except TimeoutException:
-            continue
+            driver.refresh()
 
     wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
     driver.execute_script("window.stop();")
@@ -48,6 +48,8 @@ def main(name_last_name, phone_number, the_link):
     select_element.select_by_value('1')
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
+
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
 
     while True:
         try:
@@ -65,6 +67,11 @@ def main(name_last_name, phone_number, the_link):
             available_times.append(available_time)
     # Clicks a random appointment time
     choice(available_times).click()
+
+    # Temporary
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
+               r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
+               r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
 
     while True:
         try:
@@ -130,28 +137,27 @@ def get_all_the_info():
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
-                              command=lambda: iterate_through(all_info, variable=var))
-
+                              command=lambda: iterate_through(all_info, var=var))
     start_button.config(padding=10)
     start_button.grid(row=2, column=0, columnspan=amount + 1)
     window.mainloop()
 
 
-def iterate_through(information, variable):
+def iterate_through(information, var):
     """
     iterates through the list of info and gets an appointment for each one
-    :param variable: the radio button variable that determines which link to be used
     :param information: all the information including names and phone numbers
     :return: None
     """
+    global the_link
     i = 0
     information.reverse()
-    if variable == 1:
+    if var == 1:
         the_link = DOLKHANI_LINK
-    else:
+    elif var == 2:
         the_link = ARYA_LINK
     for info in information:
-        main(name_last_name=info[0].get(), phone_number=info[1].get(), the_link=the_link)
+        main(name_last_name=info[0].get(), phone_number=info[1].get())
         driver.switch_to.window(driver.window_handles[i + 1])
         i += 1
 
