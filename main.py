@@ -11,12 +11,10 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice
 import multiprocessing
 
-webdriver_path = r"chromedriver.exe"
-
-
-# TODO: test the second website
+# TODO: test the whole program its done imo just needs bug fixes
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
+WEBDRIVER_PATH = r"chromedriver.exe"
 
 
 def main(name_last_name, phone_number, the_link):
@@ -24,7 +22,7 @@ def main(name_last_name, phone_number, the_link):
     The main process!
     returns None
     """
-    ser = service.Service(executable_path=webdriver_path)
+    ser = service.Service(executable_path=WEBDRIVER_PATH)
     option = Options()
     option.add_experimental_option("detach", True)
     option.page_load_strategy = "none"
@@ -36,12 +34,11 @@ def main(name_last_name, phone_number, the_link):
         try:
             wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
             images = driver.find_elements(By.TAG_NAME, "img")
-            if ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")):
+            if driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
                 break
             if len(images) <= 1:
                 raise NoSuchElementException
             break
-        # TODO: fix this so it doesnt refresh when the loading icon appears kind of the same thing as the one above
         except NoSuchElementException:
             driver.refresh()
         except TimeoutException:
