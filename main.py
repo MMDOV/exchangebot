@@ -143,20 +143,21 @@ def get_all_the_info():
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
-                              command=lambda: iterate_through(all_info, var=sarafi))
+                              command=lambda: iterate_through(all_info, variable=sarafi))
     start_button.config(padding=10)
     start_button.grid(row=3, column=0, columnspan=amount + 1)
     window.mainloop()
 
 
-def iterate_through(information, var):
+def iterate_through(information, variable):
     """
     iterates through the list of info and gets an appointment for each one
+    :param variable: determines which link to use
     :param information: all the information including names and phone numbers
     :return: None
     """
     information.reverse()
-    if var == 1:
+    if variable == 1:
         the_link = DOLKHANI_LINK
     else:
         the_link = ARYA_LINK
