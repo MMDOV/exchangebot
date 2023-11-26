@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice
@@ -22,75 +22,78 @@ def main(name_last_name, phone_number, the_link):
     The main process!
     returns None
     """
-    ser = service.Service(executable_path=WEBDRIVER_PATH)
-    option = Options()
-    option.add_experimental_option("detach", True)
-    option.page_load_strategy = "none"
-    driver = webdriver.Chrome(service=ser, options=option)
-    wait = WebDriverWait(driver, 20)
-    driver.get(the_link)
-    # Refreshes the window until it can start
-    while True:
-        try:
-            wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
-            images = driver.find_elements(By.TAG_NAME, "img")
-            if driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
+    try:
+        ser = service.Service(executable_path=WEBDRIVER_PATH)
+        option = Options()
+        option.add_experimental_option("detach", True)
+        option.page_load_strategy = "none"
+        driver = webdriver.Chrome(service=ser, options=option)
+        wait = WebDriverWait(driver, 20)
+        driver.get(the_link)
+        # Refreshes the window until it can start
+        while True:
+            try:
+                wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
+                images = driver.find_elements(By.TAG_NAME, "img")
+                if driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
+                    break
+                if len(images) <= 1:
+                    raise NoSuchElementException
                 break
-            if len(images) <= 1:
-                raise NoSuchElementException
-            break
-        except NoSuchElementException:
-            driver.refresh()
-        except TimeoutException:
-            continue
+            except NoSuchElementException:
+                driver.refresh()
+            except TimeoutException:
+                continue
 
-    wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
-    driver.execute_script("window.stop();")
+        wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
+        driver.execute_script("window.stop();")
 
-    # Picks "نوبت دهی" and clicks "بعدی"
-    select_element = Select(driver.find_element(By.TAG_NAME, "select"))
-    select_element.select_by_value('1')
-    next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
-    next_button.click()
+        # Picks "نوبت دهی" and clicks "بعدی"
+        select_element = Select(driver.find_element(By.TAG_NAME, "select"))
+        select_element.select_by_value('1')
+        next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
+        next_button.click()
 
-    while True:
-        try:
-            wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
-            break
-        except TimeoutException:
-            continue
-    driver.execute_script("window.stop();")
+        while True:
+            try:
+                wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
+                break
+            except TimeoutException:
+                continue
+        driver.execute_script("window.stop();")
 
-    # Gets all the available appointment times and puts them in a list
-    book_column = driver.find_element(By.CLASS_NAME, r'bookly-column')
-    available_times = []
-    for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
-        if available_time.is_enabled():
-            available_times.append(available_time)
-    # Clicks a random appointment time
-    if available_times:
-        choice(available_times).click()
-    else:
-        Messagebox.show_error(message="!نوبتی موجود نیست")
-        sys.exit()
+        # Gets all the available appointment times and puts them in a list
+        book_column = driver.find_element(By.CLASS_NAME, r'bookly-column')
+        available_times = []
+        for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
+            if available_time.is_enabled():
+                available_times.append(available_time)
+        # Clicks a random appointment time
+        if available_times:
+            choice(available_times).click()
+        else:
+            Messagebox.show_error(message="!نوبتی موجود نیست")
+            sys.exit()
 
-    while True:
-        try:
-            wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
-            break
-        except TimeoutException:
-            continue
-    driver.execute_script("window.stop();")
+        while True:
+            try:
+                wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
+                break
+            except TimeoutException:
+                continue
+        driver.execute_script("window.stop();")
 
-    # Enters the name, last name also the phone number and puts focus on the captcha input for user input
-    name_input = driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
-    name_input.clear()
-    name_input.send_keys(name_last_name)
-    phone_number_input = driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
-    phone_number_input.clear()
-    phone_number_input.send_keys(phone_number)
-    captcha_input = driver.find_element(By.CLASS_NAME, r'bookly-captcha')
-    captcha_input.click()
+        # Enters the name, last name also the phone number and puts focus on the captcha input for user input
+        name_input = driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
+        name_input.clear()
+        name_input.send_keys(name_last_name)
+        phone_number_input = driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
+        phone_number_input.clear()
+        phone_number_input.send_keys(phone_number)
+        captcha_input = driver.find_element(By.CLASS_NAME, r'bookly-captcha')
+        captcha_input.click()
+    except NoSuchWindowException:
+        Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
 
 
 def validate_phone_number(x) -> bool:
@@ -127,9 +130,9 @@ def get_all_the_info():
     for widget in window.winfo_children():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
-    name_and_last_name_label = ttk.Label(text="نام و نام خانوادگی ", padding=10, justify="right")
+    name_and_last_name_label = ttk.Label(text=":نام و نام خانوادگی ", padding=10, justify="right")
     name_and_last_name_label.grid(row=1, column=amount + 1)
-    phone_number_label = ttk.Label(text="شماره موبایل", padding=10, justify="right")
+    phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
     phone_number_label.grid(row=2, column=amount + 1)
     for i in range(amount):
         number_label = ttk.Label(text=i + 1, padding=10)
@@ -166,7 +169,7 @@ def iterate_through(information, variable):
     if __name__ == '__main__':
         for info in user_information:
             if not validate_phone_number(info[1]):
-                Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است")
+                Messagebox.show_error(message="!یکی از شماره موبایل ها اشتباه است")
                 sys.exit()
             p = multiprocessing.Process(target=main, args=(info[0], info[1], the_link))
             p.start()
@@ -185,7 +188,7 @@ if __name__ == '__main__':
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
 
-    number_of_appointment_label = ttk.Label(text="تعداد نوبت ها", padding=10, justify="right")
+    number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", padding=10, justify="right")
     number_of_appointment_label.grid(row=1, column=1)
 
     number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
