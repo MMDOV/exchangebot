@@ -35,7 +35,11 @@ def main(name_last_name, phone_number, the_link):
     while True:
         try:
             wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
-            driver.find_element(By.TAG_NAME, "img")  # TODO: needs to be replaced with the loading icon gif
+            images = driver.find_elements(By.TAG_NAME, "img")
+            if ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")):
+                break
+            if len(images) <= 1:
+                raise NoSuchElementException
             break
         # TODO: fix this so it doesnt refresh when the loading icon appears kind of the same thing as the one above
         except NoSuchElementException:
@@ -114,7 +118,7 @@ def validate_number(x) -> bool:
     if x.isdigit() and 8 >= int(x) > 0:
         return True
     elif x == "":
-        return True
+        return False
     else:
         return False
 
