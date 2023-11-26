@@ -1,3 +1,5 @@
+import sys
+
 from selenium import webdriver
 from selenium.webdriver.chrome import service
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -6,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import ttkbootstrap as ttk
+from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice
 
 webdriver_path = r"chromedriver.exe"
@@ -27,7 +30,7 @@ def main(name_last_name, phone_number):
     The main process!
     returns None
     """
-    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1.html')
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1_a.html')
     # Refreshes the window until it can start
     while True:
         try:
@@ -38,7 +41,7 @@ def main(name_last_name, phone_number):
         except NoSuchElementException:
             driver.refresh()
         except TimeoutException:
-            driver.refresh()
+            continue
 
     wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
     driver.execute_script("window.stop();")
@@ -49,7 +52,7 @@ def main(name_last_name, phone_number):
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
 
-    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2_a.html')  # Temporary
 
     while True:
         try:
@@ -66,7 +69,11 @@ def main(name_last_name, phone_number):
         if available_time.is_enabled():
             available_times.append(available_time)
     # Clicks a random appointment time
-    choice(available_times).click()
+    if available_times:
+        choice(available_times).click()
+    else:
+        Messagebox.show_error(message="!نوبتی موجود نیست")
+        sys.exit()
 
     # Temporary
     driver.get(r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
@@ -125,21 +132,24 @@ def get_all_the_info():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
     name_and_last_name_label = ttk.Label(text="نام و نام خانوادگی ", padding=10, justify="right")
-    name_and_last_name_label.grid(row=0, column=amount + 1)
+    name_and_last_name_label.grid(row=1, column=amount + 1)
     phone_number_label = ttk.Label(text="شماره موبایل", padding=10, justify="right")
-    phone_number_label.grid(row=1, column=amount + 1)
+    phone_number_label.grid(row=2, column=amount + 1)
     for i in range(amount):
+        number_label = ttk.Label(text=i + 1, padding=10)
+        number_label.grid(row=0, column=amount - i - 1)
+
         name_and_last_name_entry = ttk.Entry(width=20, justify="right")
-        name_and_last_name_entry.grid(row=0, column=i)
+        name_and_last_name_entry.grid(row=1, column=i)
 
         phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
-        phone_number_entry.grid(row=1, column=i)
+        phone_number_entry.grid(row=2, column=i)
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
                               command=lambda: iterate_through(all_info, var=var))
     start_button.config(padding=10)
-    start_button.grid(row=2, column=0, columnspan=amount + 1)
+    start_button.grid(row=3, column=0, columnspan=amount + 1)
     window.mainloop()
 
 
@@ -165,6 +175,7 @@ def iterate_through(information, var):
 # ----------------------------------------------UI------------------------------------------------ #
 # TODO: make it so you can select and run both websites at the same time
 #  (probably needs multithreading or multiprocessing)
+# TODO: these are some ideas to make it work maybe use __name__ == '__main__' or put all the ui in a separate file
 window = ttk.Window()
 window.title("ربات گرفتن نوبت صرافی")
 window.config(pady=20, padx=40)
