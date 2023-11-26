@@ -15,12 +15,11 @@ webdriver_path = r"chromedriver.exe"
 
 
 # TODO: test the second website
-# TODO: multi threading / processing needed to be added if possible
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 
 
-def main(name_last_name, phone_number):
+def main(name_last_name, phone_number, the_link):
     """
     The main process!
     returns None
@@ -112,7 +111,7 @@ def validate_phone_number(x) -> bool:
 
 def validate_number(x) -> bool:
     """Validates that the input is a number and is within the accepted range"""
-    if x.isdigit() and 5 >= int(x) > 0:
+    if x.isdigit() and 8 >= int(x) > 0:
         return True
     elif x == "":
         return True
@@ -126,6 +125,9 @@ def get_all_the_info():
     :return: a list of all the information that is passed to another function via the button
     """
     all_info = []
+    if not validate_number(number_of_appointment_entry.get()):
+        Messagebox.show_error(message="لطفا یک شماره بین صفر تا هشت وارد کنید")
+        return None
     amount = int(number_of_appointment_entry.get())
     sarafi = var.get()
     for widget in window.winfo_children():
@@ -147,7 +149,7 @@ def get_all_the_info():
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
-                              command=lambda: iterate_through(all_info, var=var))
+                              command=lambda: iterate_through(all_info, var=sarafi))
     start_button.config(padding=10)
     start_button.grid(row=3, column=0, columnspan=amount + 1)
     window.mainloop()
@@ -159,7 +161,6 @@ def iterate_through(information, var):
     :param information: all the information including names and phone numbers
     :return: None
     """
-    global the_link
     information.reverse()
     if var == 1:
         the_link = DOLKHANI_LINK
@@ -169,7 +170,10 @@ def iterate_through(information, var):
     user_information = [(info[0].get(), info[1].get()) for info in information]
     if __name__ == '__main__':
         for info in user_information:
-            p = multiprocessing.Process(target=main, args=(info[0], info[1]))
+            if not validate_phone_number(info[1]):
+                Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است")
+                sys.exit()
+            p = multiprocessing.Process(target=main, args=(info[0], info[1], the_link))
             p.start()
             processes.append(p)
 
@@ -178,8 +182,6 @@ def iterate_through(information, var):
 
 
 # ----------------------------------------------UI------------------------------------------------ #
-# TODO: make it so you can select and run both websites at the same time
-#  (probably needs multithreading or multiprocessing)
 if __name__ == '__main__':
     window = ttk.Window()
     window.title("ربات گرفتن نوبت صرافی")
