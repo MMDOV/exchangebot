@@ -29,7 +29,7 @@ def main(name_last_name, phone_number, the_link):
         option.page_load_strategy = "none"
         driver = webdriver.Chrome(service=ser, options=option)
         wait = WebDriverWait(driver, 20)
-        driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1_a.html')
+        driver.get(the_link)
         # Refreshes the window until it can start
         while True:
             try:
@@ -54,8 +54,6 @@ def main(name_last_name, phone_number, the_link):
         next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
         next_button.click()
 
-        driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
-
         while True:
             try:
                 wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
@@ -76,11 +74,6 @@ def main(name_last_name, phone_number, the_link):
         else:
             Messagebox.show_error(message="!نوبتی موجود نیست")
             sys.exit()
-
-        # Temporary
-        driver.get(r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
-                   r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
-                   r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
 
         while True:
             try:
