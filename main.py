@@ -165,7 +165,7 @@ def iterate_through(information, var):
     information.reverse()
     if var == 1:
         the_link = DOLKHANI_LINK
-    elif var == 2:
+    else:
         the_link = ARYA_LINK
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
