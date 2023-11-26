@@ -65,6 +65,7 @@ def main(name_last_name, phone_number, the_link):
         driver.execute_script("window.stop();")
 
         # Gets all the available appointment times and puts them in a list
+        # TODO: multiple processes can pick the same time needs fixing
         book_column = driver.find_element(By.CLASS_NAME, r'bookly-column')
         available_times = []
         for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
@@ -72,7 +73,9 @@ def main(name_last_name, phone_number, the_link):
                 available_times.append(available_time)
         # Clicks a random appointment time
         if available_times:
-            choice(available_times).click()
+            random_choice = choice(available_times)
+            random_choice.click()
+            available_times.remove(random_choice)
         else:
             Messagebox.show_error(message="!نوبتی موجود نیست")
             sys.exit()
