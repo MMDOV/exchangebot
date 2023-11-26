@@ -35,6 +35,7 @@ def main(name_last_name, phone_number, the_link):
     while True:
         try:
             wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
+            driver.execute_script("window.stop();")
             driver.find_element(By.TAG_NAME, "img")  # TODO: needs to be replaced with the loading icon gif
             break
         # TODO: fix this so it doesnt refresh when the loading icon appears kind of the same thing as the one above
