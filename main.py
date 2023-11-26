@@ -137,10 +137,16 @@ def get_all_the_info():
     for widget in window.winfo_children():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
-    name_and_last_name_label = ttk.Label(text="نام و نام خانوادگی ", padding=10, justify="right")
+
+    name_and_last_name_label = ttk.Label(text=":نام و نام خانوادگی ", padding=10, justify="right")
     name_and_last_name_label.grid(row=1, column=amount + 1)
-    phone_number_label = ttk.Label(text="شماره موبایل", padding=10, justify="right")
+
+    phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
     phone_number_label.grid(row=2, column=amount + 1)
+
+    help_button_2 = ttk.Button(window, text="کمک", width=5, command=lambda: show_help(2))
+    help_button_2.grid(row=0, column=amount + 1)
+
     for i in range(amount):
         number_label = ttk.Label(text=i + 1, padding=10)
         number_label.grid(row=0, column=amount - i - 1)
@@ -150,6 +156,7 @@ def get_all_the_info():
 
         phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
         phone_number_entry.grid(row=2, column=i)
+
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
@@ -186,6 +193,17 @@ def iterate_through(information, variable):
             p.join()
 
 
+def show_help(x):
+    if x == 1:
+        Messagebox.show_info(title="کمک", message="""صرافی مورد نظر رو انتخاب کنید و تعداد نوبتی که نیاز دارید رو هم 
+        وارد کنید توجه شود که تعداد بالای نوبت نیازمند کامپیوتر قوی تری است و در حال حاضر محدودیت 8 تایی روی تعداد 
+        اعمال شده است""")
+    else:
+        Messagebox.show_info(title="کمک", message="""نام و نام خانوادگی و همچنین شماره موبایل ها را وارد کنید توجه 
+        کنید که شماره های بالا فقط برای معلوم بودن هر نوبت می باشد و تاثیری در ترتیب ندارد لازم به ذکر است که در این 
+        پنجره میتوانید چیزی وارد نکنید ولی در مرحله آخر اطلاعات باید دستی وارد شود""")
+
+
 # ----------------------------------------------UI------------------------------------------------ #
 if __name__ == '__main__':
     window = ttk.Window()
@@ -195,19 +213,23 @@ if __name__ == '__main__':
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
 
-    number_of_appointment_label = ttk.Label(text="تعداد نوبت ها", padding=10, justify="right")
-    number_of_appointment_label.grid(row=1, column=1)
+    number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", padding=10, justify="right")
+    number_of_appointment_label.grid(row=1, column=2)
 
     number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
-    number_of_appointment_entry.grid(row=1, column=0)
+    number_of_appointment_entry.grid(row=1, column=0, columnspan=2)
 
     radio1 = ttk.Radiobutton(window, text="دولخانی", variable=var, value=1, padding=10)
-    radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
     radio1.grid(row=0, column=0)
+
+    radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
     radio2.grid(row=0, column=1)
+
+    help_button_1 = ttk.Button(window, text="کمک", width=5, command=lambda: show_help(1))
+    help_button_1.grid(row=0, column=2)
 
     button = ttk.Button(text="بعدی", width=20, bootstyle='dark', command=get_all_the_info)
     button.config(padding=10)
-    button.grid(row=4, column=0, columnspan=2)
+    button.grid(row=4, column=0, columnspan=3)
 
     window.mainloop()
