@@ -1,5 +1,4 @@
 import sys
-
 from selenium import webdriver
 from selenium.webdriver.chrome import service
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -10,14 +9,10 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice
+import multiprocessing
 
 webdriver_path = r"chromedriver.exe"
-ser = service.Service(executable_path=webdriver_path)
-option = Options()
-option.add_experimental_option("detach", True)
-option.page_load_strategy = "none"
-driver = webdriver.Chrome(service=ser, options=option)
-wait = WebDriverWait(driver, 20)
+
 
 # TODO: test the second website
 # TODO: multi threading / processing needed to be added if possible
@@ -30,6 +25,12 @@ def main(name_last_name, phone_number):
     The main process!
     returns None
     """
+    ser = service.Service(executable_path=webdriver_path)
+    option = Options()
+    option.add_experimental_option("detach", True)
+    option.page_load_strategy = "none"
+    driver = webdriver.Chrome(service=ser, options=option)
+    wait = WebDriverWait(driver, 20)
     driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1_a.html')
     # Refreshes the window until it can start
     while True:
@@ -52,7 +53,7 @@ def main(name_last_name, phone_number):
     next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
     next_button.click()
 
-    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2_a.html')  # Temporary
+    driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
 
     while True:
         try:
@@ -97,7 +98,6 @@ def main(name_last_name, phone_number):
     phone_number_input.send_keys(phone_number)
     captcha_input = driver.find_element(By.CLASS_NAME, r'bookly-captcha')
     captcha_input.click()
-    wait.until(ec.new_window_is_opened(driver.window_handles))
 
 
 def validate_phone_number(x) -> bool:
@@ -160,42 +160,47 @@ def iterate_through(information, var):
     :return: None
     """
     global the_link
-    i = 0
     information.reverse()
     if var == 1:
         the_link = DOLKHANI_LINK
     elif var == 2:
         the_link = ARYA_LINK
-    for info in information:
-        main(name_last_name=info[0].get(), phone_number=info[1].get())
-        driver.switch_to.window(driver.window_handles[i + 1])
-        i += 1
+    processes = []
+    user_information = [(info[0].get(), info[1].get()) for info in information]
+    if __name__ == '__main__':
+        for info in user_information:
+            p = multiprocessing.Process(target=main, args=(info[0], info[1]))
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            p.join()
 
 
 # ----------------------------------------------UI------------------------------------------------ #
 # TODO: make it so you can select and run both websites at the same time
 #  (probably needs multithreading or multiprocessing)
-# TODO: these are some ideas to make it work maybe use __name__ == '__main__' or put all the ui in a separate file
-window = ttk.Window()
-window.title("ربات گرفتن نوبت صرافی")
-window.config(pady=20, padx=40)
+if __name__ == '__main__':
+    window = ttk.Window()
+    window.title("ربات گرفتن نوبت صرافی")
+    window.config(pady=20, padx=40)
 
-var = ttk.IntVar()
-digit_func = window.register(validate_number)
+    var = ttk.IntVar()
+    digit_func = window.register(validate_number)
 
-number_of_appointment_label = ttk.Label(text="تعداد نوبت ها", padding=10, justify="right")
-number_of_appointment_label.grid(row=1, column=1)
+    number_of_appointment_label = ttk.Label(text="تعداد نوبت ها", padding=10, justify="right")
+    number_of_appointment_label.grid(row=1, column=1)
 
-number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
-number_of_appointment_entry.grid(row=1, column=0)
+    number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
+    number_of_appointment_entry.grid(row=1, column=0)
 
-radio1 = ttk.Radiobutton(window, text="دولخانی", variable=var, value=1, padding=10)
-radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
-radio1.grid(row=0, column=0)
-radio2.grid(row=0, column=1)
+    radio1 = ttk.Radiobutton(window, text="دولخانی", variable=var, value=1, padding=10)
+    radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
+    radio1.grid(row=0, column=0)
+    radio2.grid(row=0, column=1)
 
-button = ttk.Button(text="بعدی", width=20, bootstyle='dark', command=get_all_the_info)
-button.config(padding=10)
-button.grid(row=4, column=0, columnspan=2)
+    button = ttk.Button(text="بعدی", width=20, bootstyle='dark', command=get_all_the_info)
+    button.config(padding=10)
+    button.grid(row=4, column=0, columnspan=2)
 
-window.mainloop()
+    window.mainloop()
