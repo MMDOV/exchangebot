@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.dialogs import Messagebox
-from random import choice
+from random import choice, seed
 import multiprocessing
 
 # TODO: test the whole program its done imo just needs bug fixes
@@ -17,7 +17,7 @@ ARYA_LINK = r'https://exarya.ir/appointment/'
 WEBDRIVER_PATH = r"chromedriver.exe"
 
 
-def main(name_last_name, phone_number, the_link):
+def main(name_last_name, phone_number, the_link, the_seed):
     """
     The main process!
     returns None
@@ -71,6 +71,7 @@ def main(name_last_name, phone_number, the_link):
                 available_times.append(available_time)
         # Clicks a random appointment time
         if available_times:
+            seed(the_seed)
             random_choice = choice(available_times)
             random_choice.click()
             available_times.remove(random_choice)
@@ -169,6 +170,7 @@ def iterate_through(information, variable):
     :param information: all the information including names and phone numbers
     :return: None
     """
+    i = 1
     information.reverse()
     if variable == 1:
         the_link = DOLKHANI_LINK
@@ -181,9 +183,10 @@ def iterate_through(information, variable):
             if not validate_phone_number(info[1]):
                 Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است")
                 sys.exit()
-            p = multiprocessing.Process(target=main, args=(info[0], info[1], the_link))
+            p = multiprocessing.Process(target=main, args=(info[0], info[1], the_link, i))
             p.start()
             processes.append(p)
+            i += 1
 
         for p in processes:
             p.join()
