@@ -17,7 +17,7 @@ ARYA_LINK = r'https://exarya.ir/appointment/'
 WEBDRIVER_PATH = r"chromedriver.exe"
 
 
-def main(name_last_name, phone_number, the_link, the_seed):
+def main(name_last_name, phone_number, the_link):
     """
     The main process!
     returns None
@@ -148,7 +148,9 @@ def get_all_the_info():
     phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
     phone_number_label.grid(row=2, column=amount + 1)
 
-    help_button_2 = ttk.Button(window, text="کمک", width=5, command=lambda: show_help(2))
+    photo1 = ttk.PhotoImage(file=r"question.png", width=16, height=16)
+    help_button_2 = ttk.Button(window, text="کمک", image=photo1, bootstyle='light', width=5,
+                               command=lambda: show_help(2))
     help_button_2.grid(row=0, column=amount + 1)
 
     for i in range(amount):
@@ -177,7 +179,6 @@ def iterate_through(information, variable):
     :param information: all the information including names and phone numbers
     :return: None
     """
-    i = 1
     information.reverse()
     if variable == 1:
         the_link = DOLKHANI_LINK
@@ -190,10 +191,9 @@ def iterate_through(information, variable):
             if not validate_phone_number(info[1]):
                 Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است")
                 sys.exit()
-            p = threading.Thread(target=main, args=(info[0], info[1], the_link, i))
+            p = threading.Thread(target=main, args=(info[0], info[1], the_link))
             p.start()
             processes.append(p)
-            i += 1
         for p in processes:
             p.join()
 
@@ -230,7 +230,9 @@ if __name__ == '__main__':
     radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
     radio2.grid(row=0, column=1)
 
-    help_button_1 = ttk.Button(window, text="کمک", width=5, command=lambda: show_help(1))
+    photo = ttk.PhotoImage(file=r"question.png", width=16, height=16)
+    help_button_1 = ttk.Button(window, text="کمک", image=photo, width=5, bootstyle="light",
+                               command=lambda: show_help(1))
     help_button_1.grid(row=0, column=2)
 
     button = ttk.Button(text="بعدی", width=20, bootstyle='dark', command=get_all_the_info)
