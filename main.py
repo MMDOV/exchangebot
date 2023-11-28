@@ -8,9 +8,13 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException
 import ttkbootstrap as ttk
+import tkinter as tk
 from ttkbootstrap.dialogs.dialogs import Messagebox
+from tkinter import messagebox
 from random import choice
 import threading
+import time
+from pubsub import pub
 
 # TODO: test the whole program its done imo just needs bug fixes
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
@@ -20,13 +24,17 @@ if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver.exe")
 else:
     WEBDRIVER_PATH = r"files/chromedriver.exe"
+lock = threading.Lock()
 
 
-class Main:
+class Main(ttk.Frame):
     """
     the main class does everything
     """
-    def __init__(self, name_last_name, phone_number, the_link):
+
+    def __init__(self, name_last_name, phone_number, the_link, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        super().__init__()
         self.name_last_name = name_last_name
         self.phone_number = phone_number
         self.the_link = the_link
@@ -36,7 +44,8 @@ class Main:
         option.page_load_strategy = "none"
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
-        self.first_step()
+        with lock:
+            self.first_step()
 
     def first_step(self):
         """
@@ -78,7 +87,7 @@ class Main:
         :return: None
         """
         try:
-            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
+            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2_a.html')  # Temporary
 
             while True:
                 try:
@@ -103,7 +112,6 @@ class Main:
                 self.third_step()
             else:
                 Messagebox.show_error(message="!نوبتی موجود نیست")
-                sys.exit()
         except NoSuchWindowException:
             sys.exit()
 
@@ -211,7 +219,6 @@ def get_all_the_info():
                               command=lambda: iterate_through(all_info, variable=sarafi))
     start_button.config(padding=10)
     start_button.grid(row=3, column=0, columnspan=amount + 1)
-    window.mainloop()
 
 
 def iterate_through(information, variable):
@@ -228,12 +235,15 @@ def iterate_through(information, variable):
         the_link = ARYA_LINK
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
+    for widget in window.winfo_children():
+        widget.destroy()
     if __name__ == '__main__':
         for info in user_information:
             if not validate_phone_number(info[1]):
                 Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است")
                 sys.exit()
             p = threading.Thread(target=Main, args=(info[0], info[1], the_link))
+            pub.subscribe(main.listener, 'listener')
             p.start()
             processes.append(p)
         for p in processes:
@@ -251,12 +261,26 @@ def show_help(x):
         پنجره میتوانید چیزی وارد نکنید ولی در مرحله آخر اطلاعات باید دستی وارد شود""")
 
 
+class WorkerThread(threading.Thread):
+    def __init__(self):
+        super(WorkerThread, self).__init__()
+        self.daemon = True  # do not keep thread after app exit
+        self._stop = False
+
+    def run(self):
+        """calculate your plot data here"""
+        for i in range(100):
+            if self._stop:
+                break
+            time.sleep(1)
+            pub.sendMessage('listener', text=str(i))
+
+
 # ----------------------------------------------UI------------------------------------------------ #
 if __name__ == '__main__':
     window = ttk.Window()
     window.title("ربات گرفتن نوبت صرافی")
     window.config(pady=20, padx=40)
-
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
 
@@ -284,4 +308,9 @@ if __name__ == '__main__':
     button.config(padding=10)
     button.grid(row=4, column=0, columnspan=3)
 
-    window.mainloop()
+    running = True
+    while running:
+        window.update()
+        if data_available:
+            copydata_to_gui()
+    window.quit()
