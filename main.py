@@ -70,7 +70,7 @@ class Main:
             next_button.click()
             self.second_step()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+            sys.exit()
 
     def second_step(self):
         """
@@ -105,7 +105,7 @@ class Main:
                 Messagebox.show_error(message="!نوبتی موجود نیست")
                 sys.exit()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+            sys.exit()
 
     def third_step(self):
         """
@@ -143,7 +143,7 @@ class Main:
             except NoSuchElementException:
                 sys.exit()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+            sys.exit()
 
 
 def validate_phone_number(x) -> bool:
