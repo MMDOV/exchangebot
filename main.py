@@ -13,7 +13,7 @@ from random import choice
 import threading
 
 # TODO: test the whole program its done imo just needs bug fixes
-DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
+DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver.exe")
@@ -50,16 +50,22 @@ class Main:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
                     images = self.driver.find_elements(By.TAG_NAME, "img")
-                    if self.driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
-                        break
                     if len(images) <= 1:
                         raise NoSuchElementException
-                    break
+                    elif len(images) > 1:
+                        break
+                    elif self.driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
+                        break
                 except NoSuchElementException:
                     self.driver.refresh()
                 except TimeoutException:
                     continue
-            self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
+                    break
+                except TimeoutException:
+                    continue
             self.driver.execute_script("window.stop();")
             # Picks "نوبت دهی" and clicks "بعدی"
             select_element = Select(self.driver.find_element(By.TAG_NAME, "select"))
@@ -78,14 +84,17 @@ class Main:
         try:
             while True:
                 try:
-                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
+                    self.wait.until(ec.element_to_be_clickable((By.TAG_NAME, 'button')))
+                    self.driver.find_element(By.CLASS_NAME, r'bookly-column')
                     break
                 except TimeoutException:
                     continue
+                except NoSuchElementException:
+                    self.first_step()
             self.driver.execute_script("window.stop();")
             # Gets all the available appointment times and puts them in a list
-            book_column = self.driver.find_element(By.CLASS_NAME, r'bookly-column')
             available_times = []
+            book_column = self.driver.find_element(By.CLASS_NAME, r'bookly-column')
             for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
                 if available_time.is_enabled():
                     available_times.append(available_time)
@@ -123,7 +132,12 @@ class Main:
             phone_number_input.send_keys(self.phone_number)
             captcha_input = self.driver.find_element(By.CLASS_NAME, r'bookly-captcha')
             captcha_input.click()
-            self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'bookly-captcha')))
+            while True:
+                try:
+                    self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'bookly-captcha')))
+                    break
+                except TimeoutException:
+                    continue
             try:
                 self.driver.find_element(By.CLASS_NAME, r'bookly-column')
                 self.second_step()
@@ -216,7 +230,6 @@ def iterate_through(information, variable):
         the_link = ARYA_LINK
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
-    window.quit()
     if __name__ == '__main__':
         for info in user_information:
             if not validate_phone_number(info[1]):
