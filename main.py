@@ -15,7 +15,6 @@ import threading
 # TODO: test the whole program its done imo just needs bug fixes
 DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
-WEBDRIVER_PATH = r"chromedriver.exe"
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver.exe")
 else:
