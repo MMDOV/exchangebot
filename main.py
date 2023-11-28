@@ -17,91 +17,126 @@ DOLKHANI_LINK = r'https://dolkhaniexchange.ir/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 WEBDRIVER_PATH = r"chromedriver.exe"
 if getattr(sys, 'frozen', False):
-    WEBDRIVER_PATH = file = os.path.join(sys._MEIPASS, r"files/chromedriver.exe")
+    WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver.exe")
 else:
     WEBDRIVER_PATH = r"files/chromedriver.exe"
 
 
-def main(name_last_name, phone_number, the_link):
+class Main:
     """
-    The main process!
-    returns None
+    the main class does everything
     """
-    try:
+
+    def __init__(self, name_last_name, phone_number, the_link):
+        self.name_last_name = name_last_name
+        self.phone_number = phone_number
+        self.the_link = the_link
         ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
         option.add_experimental_option("detach", True)
         option.page_load_strategy = "none"
-        driver = webdriver.Chrome(service=ser, options=option)
-        wait = WebDriverWait(driver, 20)
-        driver.get(the_link)
-        # Refreshes the window until it can start
-        while True:
-            try:
-                wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
-                images = driver.find_elements(By.TAG_NAME, "img")
-                if driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
+        self.driver = webdriver.Chrome(service=ser, options=option)
+        self.wait = WebDriverWait(self.driver, 20)
+        self.first_step()
+
+    def first_step(self):
+        """
+        The first step of the process!
+        returns None
+        """
+        try:
+            self.driver.get(self.the_link)
+            # Refreshes the window until it can start
+            while True:
+                try:
+                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
+                    images = self.driver.find_elements(By.TAG_NAME, "img")
+                    if self.driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
+                        break
+                    if len(images) <= 1:
+                        raise NoSuchElementException
                     break
-                if len(images) <= 1:
-                    raise NoSuchElementException
-                break
+                except NoSuchElementException:
+                    self.driver.refresh()
+                except TimeoutException:
+                    continue
+
+            self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
+            self.driver.execute_script("window.stop();")
+
+            # Picks "نوبت دهی" and clicks "بعدی"
+            select_element = Select(self.driver.find_element(By.TAG_NAME, "select"))
+            select_element.select_by_value('1')
+            next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
+            next_button.click()
+            self.second_step()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+
+    def second_step(self):
+        """
+        the second step of the process
+        :return: None
+        """
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
+                    break
+                except TimeoutException:
+                    continue
+            self.driver.execute_script("window.stop();")
+
+            # Gets all the available appointment times and puts them in a list
+            # TODO: multiple processes can pick the same time needs fixing
+            book_column = self.driver.find_element(By.CLASS_NAME, r'bookly-column')
+            available_times = []
+            for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
+                if available_time.is_enabled():
+                    available_times.append(available_time)
+            # Clicks a random appointment time
+            if available_times:
+                random_choice = choice(available_times)
+                random_choice.click()
+                available_times.remove(random_choice)
+                self.third_step()
+            else:
+                Messagebox.show_error(message="!نوبتی موجود نیست")
+                sys.exit()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+
+    def third_step(self):
+        """
+        the third step of the process
+        :return: None
+        """
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
+                    break
+                except TimeoutException:
+                    continue
+            self.driver.execute_script("window.stop();")
+
+            # Enters the name, last name also the phone number and puts focus on the captcha input for user input
+            name_input = self.driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
+            name_input.clear()
+            name_input.send_keys(self.name_last_name)
+            phone_number_input = self.driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
+            phone_number_input.clear()
+            phone_number_input.send_keys(self.phone_number)
+            captcha_input = self.driver.find_element(By.CLASS_NAME, r'bookly-captcha')
+            captcha_input.click()
+            self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'bookly-captcha')))
+            try:
+                self.driver.find_element(By.CLASS_NAME, r'bookly-column')
+                self.second_step()
             except NoSuchElementException:
-                driver.refresh()
-            except TimeoutException:
-                continue
-
-        wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
-        driver.execute_script("window.stop();")
-
-        # Picks "نوبت دهی" and clicks "بعدی"
-        select_element = Select(driver.find_element(By.TAG_NAME, "select"))
-        select_element.select_by_value('1')
-        next_button = driver.find_element(By.CLASS_NAME, 'bookly-next-step')
-        next_button.click()
-
-        while True:
-            try:
-                wait.until(ec.presence_of_element_located((By.CLASS_NAME, 'bookly-hour')))
-                break
-            except TimeoutException:
-                continue
-        driver.execute_script("window.stop();")
-
-        # Gets all the available appointment times and puts them in a list
-        # TODO: multiple processes can pick the same time needs fixing
-        book_column = driver.find_element(By.CLASS_NAME, r'bookly-column')
-        available_times = []
-        for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
-            if available_time.is_enabled():
-                available_times.append(available_time)
-        # Clicks a random appointment time
-        if available_times:
-            random_choice = choice(available_times)
-            random_choice.click()
-            available_times.remove(random_choice)
-        else:
-            Messagebox.show_error(message="!نوبتی موجود نیست")
-            sys.exit()
-
-        while True:
-            try:
-                wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
-                break
-            except TimeoutException:
-                continue
-        driver.execute_script("window.stop();")
-
-        # Enters the name, last name also the phone number and puts focus on the captcha input for user input
-        name_input = driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
-        name_input.clear()
-        name_input.send_keys(name_last_name)
-        phone_number_input = driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
-        phone_number_input.clear()
-        phone_number_input.send_keys(phone_number)
-        captcha_input = driver.find_element(By.CLASS_NAME, r'bookly-captcha')
-        captcha_input.click()
-    except NoSuchWindowException:
-        Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+                sys.exit()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
 
 
 def validate_phone_number(x) -> bool:
