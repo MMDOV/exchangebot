@@ -1,4 +1,5 @@
 import sys
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome import service
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -148,7 +149,10 @@ def get_all_the_info():
     phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
     phone_number_label.grid(row=2, column=amount + 1)
 
-    photo1 = ttk.PhotoImage(file=r"question.png", width=16, height=16)
+    if getattr(sys, 'frozen', False):
+        photo1 = ttk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16)
+    else:
+        photo1 = ttk.PhotoImage(file=r"files/question.png", width=16, height=16)
     help_button_2 = ttk.Button(window, text="کمک", image=photo1, bootstyle='light', width=5,
                                command=lambda: show_help(2))
     help_button_2.grid(row=0, column=amount + 1)
@@ -230,7 +234,10 @@ if __name__ == '__main__':
     radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
     radio2.grid(row=0, column=1)
 
-    photo = ttk.PhotoImage(file=r"question.png", width=16, height=16)
+    if getattr(sys, 'frozen', False):
+        photo = ttk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16)
+    else:
+        photo = ttk.PhotoImage(file=r"files/question.png", width=16, height=16)
     help_button_1 = ttk.Button(window, text="کمک", image=photo, width=5, bootstyle="light",
                                command=lambda: show_help(1))
     help_button_1.grid(row=0, column=2)
