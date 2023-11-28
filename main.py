@@ -85,7 +85,6 @@ class Main:
                     continue
             self.driver.execute_script("window.stop();")
             # Gets all the available appointment times and puts them in a list
-            # TODO: multiple processes can pick the same time needs fixing
             book_column = self.driver.find_element(By.CLASS_NAME, r'bookly-column')
             available_times = []
             for available_time in book_column.find_elements(By.CLASS_NAME, 'bookly-hour'):
