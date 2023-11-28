@@ -60,10 +60,8 @@ class Main:
                     self.driver.refresh()
                 except TimeoutException:
                     continue
-
             self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
             self.driver.execute_script("window.stop();")
-
             # Picks "نوبت دهی" and clicks "بعدی"
             select_element = Select(self.driver.find_element(By.TAG_NAME, "select"))
             select_element.select_by_value('1')
@@ -71,7 +69,7 @@ class Main:
             next_button.click()
             self.second_step()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+            sys.exit()
 
     def second_step(self):
         """
@@ -86,7 +84,6 @@ class Main:
                 except TimeoutException:
                     continue
             self.driver.execute_script("window.stop();")
-
             # Gets all the available appointment times and puts them in a list
             # TODO: multiple processes can pick the same time needs fixing
             book_column = self.driver.find_element(By.CLASS_NAME, r'bookly-column')
@@ -104,7 +101,7 @@ class Main:
                 Messagebox.show_error(message="!نوبتی موجود نیست")
                 sys.exit()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+            sys.exit()
 
     def third_step(self):
         """
@@ -119,7 +116,6 @@ class Main:
                 except TimeoutException:
                     continue
             self.driver.execute_script("window.stop();")
-
             # Enters the name, last name also the phone number and puts focus on the captcha input for user input
             name_input = self.driver.find_element(By.CLASS_NAME, r'bookly-js-full-name')
             name_input.clear()
@@ -136,7 +132,7 @@ class Main:
             except NoSuchElementException:
                 sys.exit()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مرورگر بسته شده و یا وجود ندارد")
+            sys.exit()
 
 
 def validate_phone_number(x) -> bool:
@@ -222,12 +218,13 @@ def iterate_through(information, variable):
         the_link = ARYA_LINK
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
+    window.quit()
     if __name__ == '__main__':
         for info in user_information:
             if not validate_phone_number(info[1]):
                 Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است")
                 sys.exit()
-            p = threading.Thread(target=main, args=(info[0], info[1], the_link))
+            p = threading.Thread(target=Main, args=(info[0], info[1], the_link))
             p.start()
             processes.append(p)
         for p in processes:
