@@ -46,7 +46,7 @@ class Main:
         returns None
         """
         try:
-            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/loading.html')
+            self.driver.get(self.the_link)
 
             # Refreshes the window until it can start
             while True:
@@ -88,7 +88,6 @@ class Main:
         :return: None
         """
         try:
-            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2_a.html')  # Temporary
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.TAG_NAME, 'button')))
@@ -124,11 +123,6 @@ class Main:
         :return: None
         """
         try:
-            # Temporary
-            self.driver.get(
-                r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
-                r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
-                r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
             while True:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
@@ -239,10 +233,10 @@ def iterate_through(information, variable):
     """
     i = 1
     information.reverse()
-    if variable == 1:
-        the_link = DOLKHANI_LINK
-    else:
+    if variable == 2:
         the_link = ARYA_LINK
+    else:
+        the_link = DOLKHANI_LINK
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
     if __name__ == '__main__':
