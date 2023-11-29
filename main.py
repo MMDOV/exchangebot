@@ -42,7 +42,7 @@ class Main:
 
     def first_step(self):
         """
-        The first step of the process!
+        The first step of the process reloads the page until it can start and goes to the next step
         returns None
         """
         try:
@@ -83,7 +83,8 @@ class Main:
 
     def second_step(self):
         """
-        the second step of the process
+        the second step of the process if available picks a time and goes to the next step otherwise either goes back to
+        the first step or raises an error
         :return: None
         """
         try:
@@ -118,7 +119,9 @@ class Main:
 
     def third_step(self):
         """
-        the third step of the process
+        the third step of the process fills in the information needed and waits for user to put in Captcha and hits next
+        after that checks to see if its back on the second window or not if so it repeats second step otherwise ends
+        the program
         :return: None
         """
         try:
@@ -179,6 +182,7 @@ def validate_number(x) -> bool:
 def get_all_the_info():
     """
     gets the amount from main window and creates a new window to collect all the info needed
+    also determines which link to use
     :return: a list of all the information that is passed to another function via the button
     """
     all_info = []
@@ -186,7 +190,14 @@ def get_all_the_info():
         Messagebox.show_error(message="لطفا یک شماره بین صفر تا هشت وارد کنید", title=f'ارور')
         return None
     amount = int(number_of_appointment_entry.get())
-    sarafi = var.get()
+    variable = var.get()
+    if variable == 2:
+        the_link = ARYA_LINK
+    elif variable == 1:
+        the_link = DOLKHANI_LINK
+    else:
+        Messagebox.show_error(message="لطفا یکی از صرافی ها را انتخاب کنید", title="ارور")
+        return None
     for widget in window.winfo_children():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
@@ -218,32 +229,29 @@ def get_all_the_info():
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
-                              command=lambda: iterate_through(all_info, variable=sarafi))
+                              command=lambda: iterate_through(all_info, link=the_link))
     start_button.config(padding=10)
     start_button.grid(row=3, column=0, columnspan=amount + 1)
 
 
-def iterate_through(information, variable):
+def iterate_through(information, link):
     """
     iterates through the list of info and gets an appointment for each one
-    :param variable: determines which link to use
+    :param link: the link to give to main
     :param information: all the information including names and phone numbers
     :return: None
     """
     i = 1
     information.reverse()
-    if variable == 2:
-        the_link = ARYA_LINK
-    else:
-        the_link = DOLKHANI_LINK
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
+    window.destroy()
     if __name__ == '__main__':
         for info in user_information:
             if not validate_phone_number(info[1]):
                 Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
                 sys.exit()
-            p = multiprocessing.Process(target=Main, args=(info[0], info[1], the_link, i))
+            p = multiprocessing.Process(target=Main, args=(info[0], info[1], link, i))
             p.start()
             processes.append(p)
             i += 1
