@@ -15,23 +15,23 @@ import multiprocessing
 # TODO: test the whole program its done imo just needs bug fixes
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
-WEBDRIVER_PATH = r"chromedriver.exe"
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver.exe")
 else:
     WEBDRIVER_PATH = r"files/chromedriver.exe"
 
 
-class Main:
+class MainProcess:
     """
     the main class does everything
     """
 
-    def __init__(self, name_last_name, phone_number, the_link, index):
+    def __init__(self, name_last_name, phone_number, the_link, index, img_len):
         self.name_last_name = name_last_name
         self.phone_number = phone_number
         self.the_link = the_link
         self.index = index
+        self.img_len = img_len
         ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
         option.add_experimental_option("detach", True)
@@ -53,29 +53,46 @@ class Main:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
                     images = self.driver.find_elements(By.TAG_NAME, "img")
-
-                    if len(images) <= 1:
+                    print(len(images))
+                    if len(images) <= self.img_len:
                         raise NoSuchElementException
-                    elif len(images) > 1:
+                    elif len(images) > self.img_len:
                         break
                     if self.driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
                         break
                 except NoSuchElementException:
+                    print("refresing...")
                     self.driver.refresh()
                 except TimeoutException:
+                    print("line 67 timeout")
                     continue
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
                     break
                 except TimeoutException:
+                    print("line 74 timeout")
                     continue
             self.driver.execute_script("window.stop();")
             # Picks "نوبت دهی" and clicks "بعدی"
             select_element = Select(self.driver.find_element(By.TAG_NAME, "select"))
-            select_element.select_by_value('1')
+            try:
+                select_element.select_by_value('1')
+            except NoSuchElementException:
+                self.first_step()
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
+            # TODO: if you press the button and nothing happens
             next_button.click()
+            indicator = 0
+            while True:
+                indicator += 1
+                try:
+                    self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, 'bookly-next-step')))
+                    break
+                except TimeoutException:
+                    if indicator > 4:
+                        self.first_step()
+                    continue
             self.second_step()
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
@@ -94,6 +111,7 @@ class Main:
                     self.driver.find_element(By.CLASS_NAME, r'bookly-column')
                     break
                 except TimeoutException:
+                    print("line 104 timeout")
                     continue
                 except NoSuchElementException:
                     self.first_step()
@@ -130,6 +148,7 @@ class Main:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
                     break
                 except TimeoutException:
+                    print("line 141 timeout")
                     continue
             self.driver.execute_script("window.stop();")
 
@@ -148,6 +167,7 @@ class Main:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'bookly-captcha')))
                     break
                 except TimeoutException:
+                    print("line 160 timeout")
                     continue
             try:
                 self.driver.find_element(By.CLASS_NAME, r'bookly-column')
@@ -246,17 +266,20 @@ def iterate_through(information, link):
     processes = []
     user_information = [(info[0].get(), info[1].get()) for info in information]
     window.destroy()
-    if __name__ == '__main__':
-        for info in user_information:
-            if not validate_phone_number(info[1]):
-                Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
-                sys.exit()
-            p = multiprocessing.Process(target=Main, args=(info[0], info[1], link, i))
-            p.start()
-            processes.append(p)
-            i += 1
-        for p in processes:
-            p.join()
+    if link == DOLKHANI_LINK:
+        img_len = 2
+    else:
+        img_len = 1
+    for info in user_information:
+        if not validate_phone_number(info[1]):
+            Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
+            sys.exit()
+        p = multiprocessing.Process(target=MainProcess, args=(info[0], info[1], link, i, img_len))
+        p.start()
+        processes.append(p)
+        i += 1
+    for p in processes:
+        p.join()
 
 
 def show_help(x):
@@ -272,6 +295,7 @@ def show_help(x):
 
 # ----------------------------------------------UI------------------------------------------------ #
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     window = ttk.Window()
     window.title("ربات گرفتن نوبت صرافی")
     window.config(pady=20, padx=40)

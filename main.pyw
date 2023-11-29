@@ -270,17 +270,16 @@ def iterate_through(information, link):
         img_len = 2
     else:
         img_len = 1
-    if __name__ == '__main__':
-        for info in user_information:
-            if not validate_phone_number(info[1]):
-                Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
-                sys.exit()
-            p = multiprocessing.Process(target=MainProcess, args=(info[0], info[1], link, i, img_len))
-            p.start()
-            processes.append(p)
-            i += 1
-        for p in processes:
-            p.join()
+    for info in user_information:
+        if not validate_phone_number(info[1]):
+            Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
+            sys.exit()
+        p = multiprocessing.Process(target=MainProcess, args=(info[0], info[1], link, i, img_len))
+        p.start()
+        processes.append(p)
+        i += 1
+    for p in processes:
+        p.join()
 
 
 def show_help(x):
@@ -296,12 +295,12 @@ def show_help(x):
 
 # ----------------------------------------------UI------------------------------------------------ #
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     window = ttk.Window()
     window.title("ربات گرفتن نوبت صرافی")
     window.config(pady=20, padx=40)
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
-    Messagebox.show_info(message=__name__)
 
     number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", padding=10, justify="right")
     number_of_appointment_label.grid(row=1, column=2)
