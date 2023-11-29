@@ -64,7 +64,6 @@ class Main:
                     self.driver.refresh()
                 except TimeoutException:
                     continue
-            self.driver.execute_script("window.stop();")
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
