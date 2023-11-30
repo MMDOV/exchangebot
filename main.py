@@ -12,7 +12,6 @@ from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice
 import multiprocessing
 
-# TODO: test the whole program its done imo just needs bug fixes
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 if getattr(sys, 'frozen', False):
@@ -53,7 +52,6 @@ class MainProcess:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'page-title')))
                     images = self.driver.find_elements(By.TAG_NAME, "img")
-                    print(len(images))
                     if len(images) <= self.img_len:
                         raise NoSuchElementException
                     elif len(images) > self.img_len:
@@ -61,17 +59,14 @@ class MainProcess:
                     if self.driver.find_element(By.CSS_SELECTOR, "option[value = '0']"):
                         break
                 except NoSuchElementException:
-                    print("refresing...")
                     self.driver.refresh()
                 except TimeoutException:
-                    print("line 67 timeout")
                     continue
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
                     break
                 except TimeoutException:
-                    print("line 74 timeout")
                     continue
             self.driver.execute_script("window.stop();")
             # Picks "نوبت دهی" and clicks "بعدی"
@@ -81,17 +76,12 @@ class MainProcess:
             except NoSuchElementException:
                 self.first_step()
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
-            # TODO: if you press the button and nothing happens
             next_button.click()
-            indicator = 0
             while True:
-                indicator += 1
                 try:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, 'bookly-next-step')))
                     break
                 except TimeoutException:
-                    if indicator > 4:
-                        self.first_step()
                     continue
             self.second_step()
         except NoSuchWindowException:
@@ -111,7 +101,6 @@ class MainProcess:
                     self.driver.find_element(By.CLASS_NAME, r'bookly-column')
                     break
                 except TimeoutException:
-                    print("line 104 timeout")
                     continue
                 except NoSuchElementException:
                     self.first_step()
@@ -148,7 +137,6 @@ class MainProcess:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
                     break
                 except TimeoutException:
-                    print("line 141 timeout")
                     continue
             self.driver.execute_script("window.stop();")
 
@@ -167,7 +155,6 @@ class MainProcess:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'bookly-captcha')))
                     break
                 except TimeoutException:
-                    print("line 160 timeout")
                     continue
             try:
                 self.driver.find_element(By.CLASS_NAME, r'bookly-column')
@@ -228,11 +215,7 @@ def get_all_the_info():
     phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
     phone_number_label.grid(row=2, column=amount + 1)
 
-    if getattr(sys, 'frozen', False):
-        photo1 = ttk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16)
-    else:
-        photo1 = ttk.PhotoImage(file=r"files/question.png", width=16, height=16)
-    help_button_2 = ttk.Button(window, text="کمک", image=photo1, bootstyle='light', width=5,
+    help_button_2 = ttk.Button(window, text="کمک", image=photo, bootstyle='light', width=5,
                                command=lambda: show_help(2))
     help_button_2.grid(row=0, column=amount + 1)
 
