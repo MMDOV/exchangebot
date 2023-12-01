@@ -7,17 +7,15 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException
-import ttkbootstrap as ttk
-from ttkbootstrap.dialogs.dialogs import Messagebox
+import tkinter as ttk
+from tkinter import messagebox
 from random import choice
 import multiprocessing
 
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
-if sys.maxsize > 2 ** 32:
-    route = "files/chromedriver64.exe"
-else:
-    route = "files/chromedriver32.exe"
+route = "files/chromedriver32.exe"
+
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
 else:
@@ -89,7 +87,7 @@ class MainProcess:
                     continue
             self.second_step()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
     def second_step(self):
@@ -122,10 +120,10 @@ class MainProcess:
                 available_times.remove(random_choice)
                 self.third_step()
             else:
-                Messagebox.show_error(message="!نوبتی موجود نیست", title=f'{self.index} پنجره ')
+                messagebox.showerror(message="!نوبتی موجود نیست", title=f'{self.index} پنجره ')
                 sys.exit()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
     def third_step(self):
@@ -166,7 +164,7 @@ class MainProcess:
             except NoSuchElementException:
                 sys.exit()
         except NoSuchWindowException:
-            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
 
@@ -198,7 +196,7 @@ def get_all_the_info():
     """
     all_info = []
     if not validate_number(number_of_appointment_entry.get()):
-        Messagebox.show_error(message="لطفا یک شماره بین صفر تا هشت وارد کنید", title=f'ارور')
+        messagebox.showerror(message="لطفا یک شماره بین صفر تا هشت وارد کنید", title=f'ارور')
         return None
     amount = int(number_of_appointment_entry.get())
     variable = var.get()
@@ -207,24 +205,24 @@ def get_all_the_info():
     elif variable == 1:
         the_link = DOLKHANI_LINK
     else:
-        Messagebox.show_error(message="لطفا یکی از صرافی ها را انتخاب کنید", title="ارور")
+        messagebox.showerror(message="لطفا یکی از صرافی ها را انتخاب کنید", title="ارور")
         return None
     for widget in window.winfo_children():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
 
-    name_and_last_name_label = ttk.Label(text=":نام و نام خانوادگی ", padding=10, justify="right")
+    name_and_last_name_label = ttk.Label(text=":نام و نام خانوادگی ", pady=10, padx=10, justify="right")
     name_and_last_name_label.grid(row=1, column=amount + 1)
 
-    phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
+    phone_number_label = ttk.Label(text=":شماره موبایل", pady=10, padx=10, justify="right")
     phone_number_label.grid(row=2, column=amount + 1)
 
-    help_button_2 = ttk.Button(window, text="کمک", image=photo, bootstyle='light', width=5,
+    help_button_2 = ttk.Button(window, text="کمک", image=photo, width=18,
                                command=lambda: show_help(2))
     help_button_2.grid(row=0, column=amount + 1)
 
     for i in range(amount):
-        number_label = ttk.Label(text=i + 1, padding=10)
+        number_label = ttk.Label(text=i + 1, pady=10, padx=10)
         number_label.grid(row=0, column=amount - i - 1)
 
         name_and_last_name_entry = ttk.Entry(width=20, justify="right")
@@ -235,9 +233,9 @@ def get_all_the_info():
 
         all_info.append((name_and_last_name_entry, phone_number_entry))
 
-    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
+    start_button = ttk.Button(text="شروع", width=20,
                               command=lambda: iterate_through(all_info, link=the_link))
-    start_button.config(padding=10)
+    start_button.config(pady=10, padx=10)
     start_button.grid(row=3, column=0, columnspan=amount + 1)
 
 
@@ -259,7 +257,7 @@ def iterate_through(information, link):
         img_len = 1
     for info in user_information:
         if not validate_phone_number(info[1]):
-            Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
+            messagebox.showerror(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
         p = multiprocessing.Process(target=MainProcess, args=(info[0], info[1], link, i, img_len))
         p.start()
@@ -271,46 +269,47 @@ def iterate_through(information, link):
 
 def show_help(x):
     if x == 1:
-        Messagebox.show_info(title="کمک", message="""صرافی مورد نظر را انتخاب کنید و تعداد نوبتی که نیاز دارید را هم 
-        وارد کنید توجه شود که تعداد بالای نوبت نیازمند کامپیوتر قوی ای است و در حال حاضر محدودیت هشت تایی روی تعداد 
+        messagebox.showinfo(title="کمک", message="""صرافی مورد نظر را انتخاب کنید و تعداد نوبتی که نیاز دارید را هم
+        وارد کنید توجه شود که تعداد بالای نوبت نیازمند کامپیوتر قوی ای است و در حال حاضر محدودیت هشت تایی روی تعداد
         اعمال شده است که هنوز هم زیاد است""")
     else:
-        Messagebox.show_info(title="کمک", message="""نام و نام خانوادگی و همچنین شماره موبایل ها را وارد کنید توجه 
-        کنید که شماره های بالا فقط برای معلوم بودن هر نوبت می باشد و تاثیری در ترتیب ندارد لازم به ذکر است که در این 
+        messagebox.showinfo(title="کمک", message="""نام و نام خانوادگی و همچنین شماره موبایل ها را وارد کنید توجه
+        کنید که شماره های بالا فقط برای معلوم بودن هر نوبت می باشد و تاثیری در ترتیب ندارد لازم به ذکر است که در این
         پنجره میتوانید چیزی وارد نکنید ولی در مرحله آخر اطلاعات باید دستی وارد شود""")
 
 
 # ----------------------------------------------UI------------------------------------------------ #
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    window = ttk.Window()
+    window = ttk.Tk()
     window.title("ربات گرفتن نوبت صرافی")
     window.config(pady=20, padx=40)
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
 
-    number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", padding=10, justify="right")
+    number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", pady=10, padx=10,  justify="right")
     number_of_appointment_label.grid(row=1, column=2)
 
     number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
     number_of_appointment_entry.grid(row=1, column=0, columnspan=2)
 
-    radio1 = ttk.Radiobutton(window, text="دولخانی", variable=var, value=1, padding=10)
+    radio1 = ttk.Radiobutton(window, text="دولخانی", variable=var, value=1, pady=10, padx=10)
     radio1.grid(row=0, column=0)
 
-    radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, padding=10)
+    radio2 = ttk.Radiobutton(window, text="آریا", variable=var, value=2, pady=10, padx=10)
     radio2.grid(row=0, column=1)
 
     if getattr(sys, 'frozen', False):
         photo = ttk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16)
     else:
         photo = ttk.PhotoImage(file=r"files/question.png", width=16, height=16)
-    help_button_1 = ttk.Button(window, text="کمک", image=photo, width=5, bootstyle="light",
+    help_button_1 = ttk.Button(window, text="کمک", image=photo, width=18,
                                command=lambda: show_help(1))
     help_button_1.grid(row=0, column=2)
 
-    button = ttk.Button(text="بعدی", width=20, bootstyle='dark', command=get_all_the_info)
-    button.config(padding=10)
+    button = ttk.Button(text="بعدی", width=20, command=get_all_the_info)
+    button.config(pady=10, padx=10)
     button.grid(row=4, column=0, columnspan=3)
 
     window.mainloop()
+    
