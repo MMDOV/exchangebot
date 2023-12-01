@@ -15,9 +15,9 @@ import multiprocessing
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 if getattr(sys, 'frozen', False):
-    WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver.exe")
+    WEBDRIVER_PATH = os.path.join(sys._MEIPASS, "files/chromedriver64.exe")
 else:
-    WEBDRIVER_PATH = r"files/chromedriver.exe"
+    WEBDRIVER_PATH = r"files/chromedriver64.exe"
 
 
 class MainProcess:
