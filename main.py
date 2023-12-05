@@ -38,7 +38,7 @@ class Main:
         option.page_load_strategy = "none"
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
-        self.third_step()
+        self.first_step()
 
     def first_step(self):
         """
@@ -46,7 +46,7 @@ class Main:
         returns None
         """
         try:
-            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/loading.html')
+            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_1.html')
 
             # Refreshes the window until it can start
             while True:
@@ -88,7 +88,7 @@ class Main:
         :return: None
         """
         try:
-            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2_a.html')  # Temporary
+            self.driver.get(r'file:///V:/PycharmProjects/bot-sarafi/page_2.html')  # Temporary
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.TAG_NAME, 'button')))
@@ -126,9 +126,7 @@ class Main:
         try:
             # Temporary
             self.driver.get(
-                r'file:///V:/PycharmProjects/bot-sarafi/%D8%B3%D8%A7%D9%85%D8%A7%D9%86%D9%87%20%D9%86%D9%88%D8%A8%D8'
-                r'%AA%20%D8%AF%D9%87%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB'
-                r'%8C%20%E2%80%93%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C3.html')
+                r'file:///V:/PycharmProjects/bot-sarafi/project-desk-0aa4a1ad96659ebdaa3368e31672984f.html')
             while True:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'bookly-js-full-name')))
@@ -144,12 +142,20 @@ class Main:
             phone_number_input = self.driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
             phone_number_input.clear()
             phone_number_input.send_keys(self.phone_number)
+            try:
+                checkbox = self.driver.find_element(By.CSS_SELECTOR, "input[type='checkbox']")
+                checkbox.click()
+            except NoSuchElementException:
+                pass
             captcha_input = self.driver.find_element(By.CLASS_NAME, r'bookly-captcha')
             captcha_input.click()
             while True:
-                length_of_captcha = len(captcha_input.get_attribute("value"))
-                if length_of_captcha == 5:
-                    break
+                try:
+                    length_of_captcha = len(captcha_input.get_attribute("value"))
+                    if length_of_captcha == 5:
+                        break
+                except TypeError:
+                    pass
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
             next_button.click()
             try:
