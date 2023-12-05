@@ -1,4 +1,5 @@
 import sys
+import winsound
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome import service
@@ -15,6 +16,8 @@ import multiprocessing
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 route = "files/chromedriver32.exe"
+duration = 500  # milliseconds
+freq = 440  # Hz
 
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
@@ -64,6 +67,7 @@ class MainProcess:
                     self.driver.refresh()
                 except TimeoutException:
                     continue
+            winsound.Beep(freq, duration)
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
@@ -296,7 +300,7 @@ if __name__ == '__main__':
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
 
-    number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", pady=10, padx=10,  justify="right")
+    number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", pady=10, padx=10, justify="right")
     number_of_appointment_label.grid(row=1, column=2)
 
     number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
@@ -321,4 +325,3 @@ if __name__ == '__main__':
     button.grid(row=4, column=0, columnspan=3)
 
     window.mainloop()
-    
