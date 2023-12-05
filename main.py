@@ -65,7 +65,6 @@ class MainProcess:
                     self.driver.refresh()
                 except TimeoutException:
                     continue
-            winsound.PlaySound('*', winsound.SND_ASYNC)
 
             while True:
                 try:
@@ -82,6 +81,7 @@ class MainProcess:
                 self.first_step()
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
             next_button.click()
+            winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, 'bookly-next-step')))
@@ -152,12 +152,20 @@ class MainProcess:
             phone_number_input = self.driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
             phone_number_input.clear()
             phone_number_input.send_keys(self.phone_number)
+            try:
+                checkbox = self.driver.find_element(By.CSS_SELECTOR, "input[type='checkbox']")
+                checkbox.click()
+            except NoSuchElementException:
+                pass
             captcha_input = self.driver.find_element(By.CLASS_NAME, r'bookly-captcha')
             captcha_input.click()
             while True:
-                length_of_captcha = len(captcha_input.get_attribute("value"))
-                if length_of_captcha == 5:
-                    break
+                try:
+                    length_of_captcha = len(captcha_input.get_attribute("value"))
+                    if length_of_captcha == 5:
+                        break
+                except TypeError:
+                    continue
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
             next_button.click()
             try:
