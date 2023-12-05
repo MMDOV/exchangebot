@@ -16,8 +16,6 @@ import multiprocessing
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 route = "files/chromedriver32.exe"
-duration = 500  # milliseconds
-freq = 440  # Hz
 
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
@@ -67,7 +65,8 @@ class MainProcess:
                     self.driver.refresh()
                 except TimeoutException:
                     continue
-            winsound.Beep(freq, duration)
+            winsound.PlaySound('*', winsound.SND_ASYNC)
+
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CSS_SELECTOR, "option[value = '0']")))
