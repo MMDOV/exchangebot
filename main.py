@@ -1,5 +1,6 @@
 import sys
 import os
+import winsound
 from selenium import webdriver
 from selenium.webdriver.chrome import service
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -14,10 +15,7 @@ import multiprocessing
 
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
-if sys.maxsize > 2 ** 32:
-    route = "files/chromedriver64.exe"
-else:
-    route = "files/chromedriver32.exe"
+route = r'files/chromedriver.exe'
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
 else:
@@ -81,6 +79,7 @@ class MainProcess:
                 self.first_step()
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
             next_button.click()
+            winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, 'bookly-next-step')))
@@ -151,8 +150,26 @@ class MainProcess:
             phone_number_input = self.driver.find_element(By.CLASS_NAME, r'bookly-js-user-phone-input')
             phone_number_input.clear()
             phone_number_input.send_keys(self.phone_number)
+            try:
+                checkbox = self.driver.find_element(By.CSS_SELECTOR, "input[type='checkbox']")
+                checkbox.click()
+            except NoSuchElementException:
+                pass
             captcha_input = self.driver.find_element(By.CLASS_NAME, r'bookly-captcha')
             captcha_input.click()
+            while True:
+                try:
+                    length_of_captcha = len(captcha_input.get_attribute("value"))
+                    if length_of_captcha == 5:
+                        break
+                except TypeError:
+                    continue
+            next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
+            next_button.click()
+            try:
+                next_button.click()
+            except NoSuchElementException:
+                pass
 
             while True:
                 try:
