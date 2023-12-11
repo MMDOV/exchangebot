@@ -1,6 +1,7 @@
 import sys
 import winsound
 import os
+import winsound
 from selenium import webdriver
 from selenium.webdriver.chrome import service
 from selenium.webdriver.support.ui import WebDriverWait, Select
@@ -15,7 +16,7 @@ import multiprocessing
 
 DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
-route = "files/chromedriver.exe"
+route = r'files/chromedriver.exe'
 
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
@@ -75,13 +76,17 @@ class MainProcess:
             self.driver.execute_script("window.stop();")
             # Picks "نوبت دهی" and clicks "بعدی"
             select_element = Select(self.driver.find_element(By.TAG_NAME, "select"))
+            value = '1'
+            if self.img_len == 1:
+                value = '2'
             try:
-                select_element.select_by_value('1')
+                select_element.select_by_value(value)
             except NoSuchElementException:
                 self.first_step()
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
             next_button.click()
-            winsound.PlaySound('*', winsound.SND_ASYNC)
+            if self.img_len == 2:
+                winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, 'bookly-next-step')))
@@ -120,6 +125,8 @@ class MainProcess:
             if available_times:
                 random_choice = choice(available_times)
                 random_choice.click()
+                if self.img_len == 1:
+                    winsound.PlaySound('*', winsound.SND_ASYNC)
                 available_times.remove(random_choice)
                 self.third_step()
             else:
