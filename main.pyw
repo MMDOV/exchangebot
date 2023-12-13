@@ -39,9 +39,12 @@ class MainProcess:
         option.page_load_strategy = "none"
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
-        self.first_step()
+        if self.the_link == ARYA_LINK:
+            self.first_step_2()
+        else:
+            self.first_step_1()
 
-    def first_step(self):
+    def first_step_1(self):
         """
         The first step of the process reloads the page until it can start and goes to the next step
         returns None
@@ -73,29 +76,43 @@ class MainProcess:
             self.driver.execute_script("window.stop();")
             # Picks "نوبت دهی" and clicks "بعدی"
             select_element = Select(self.driver.find_element(By.TAG_NAME, "select"))
-            value = '1'
-            if self.img_len == 1:
-                value = '2'
             try:
-                select_element.select_by_value(value)
+                select_element.select_by_value('1')
             except NoSuchElementException:
-                self.first_step()
+                self.first_step_1()
             next_button = self.driver.find_element(By.CLASS_NAME, 'bookly-next-step')
             next_button.click()
-            if self.img_len == 2:
-                winsound.PlaySound('*', winsound.SND_ASYNC)
+            winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
                     self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, 'bookly-next-step')))
                     break
                 except TimeoutException:
                     continue
-            self.second_step()
+            self.second_step_1()
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-    def second_step(self):
+    def first_step_2(self):
+        try:
+            self.driver.get(self.the_link)
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-book-button')))
+                    break
+                except TimeoutException:
+                    continue
+            self.driver.execute_script("window.stop();")
+
+            first_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-book-button')
+            first_button.click()
+            self.second_step_2()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def second_step_1(self):
         """
         the second step of the process if available picks a time and goes to the next step otherwise either goes back to
         the first step or raises an error
@@ -110,7 +127,7 @@ class MainProcess:
                 except TimeoutException:
                     continue
                 except NoSuchElementException:
-                    self.first_step()
+                    self.first_step_1()
             self.driver.execute_script("window.stop();")
             # Gets all the available appointment times and puts them in a list
             available_times = []
@@ -122,10 +139,8 @@ class MainProcess:
             if available_times:
                 random_choice = choice(available_times)
                 random_choice.click()
-                if self.img_len == 1:
-                    winsound.PlaySound('*', winsound.SND_ASYNC)
                 available_times.remove(random_choice)
-                self.third_step()
+                self.third_step_1()
             else:
                 Messagebox.show_error(message="!نوبتی موجود نیست", title=f'{self.index} پنجره ')
                 sys.exit()
@@ -133,7 +148,22 @@ class MainProcess:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-    def third_step(self):
+    def second_step_2(self):
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
+                    break
+                except TimeoutException:
+                    continue
+            second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
+            second_button.click()
+            self.third_step_2()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def third_step_1(self):
         """
         the third step of the process fills in the information needed and waits for user to put in Captcha and hits next
         after that checks to see if its back on the second window or not if so it repeats second step otherwise ends
@@ -185,9 +215,113 @@ class MainProcess:
                     continue
             try:
                 self.driver.find_element(By.CLASS_NAME, r'bookly-column')
-                self.second_step()
+                self.second_step_1()
             except NoSuchElementException:
                 sys.exit()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def third_step_2(self):
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.presence_of_element_located((By.ID, r'booking_custom_fields_cf_lmplf0az')))
+                    break
+                except TimeoutException:
+                    continue
+
+            melli_input = self.driver.find_element(By.ID, r'booking_custom_fields_cf_lmplf0az')
+            hessab_input = self.driver.find_element(By.ID, r'booking_custom_fields_cf_oystg78e')
+            checkmark = self.driver.find_element(By.ID, r'booking_custom_fields_cf_xrp7bvqj')
+            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+            melli_input.send_keys('0610322771')
+            hessab_input.send_keys('8005238882201')
+            checkmark.click()
+            next_button.click()
+            self.fourth_step_2()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def fourth_step_2(self):
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-months')))
+                    break
+                except TimeoutException:
+                    continue
+
+            months = self.driver.find_element(By.CLASS_NAME, r'os-months')
+            days_available = []
+            for day in months.find_elements(By.CLASS_NAME, r'os-day'):
+                if 'os-not-available' not in day.get_attribute('class').split(' '):
+                    day.click()
+                    days_available.append(day)
+            if not days_available:
+                self.first_step_2()
+            hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
+            times_available = []
+            for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
+                if 'is-booked' not in time.get_attribute('class').split(' '):
+                    times_available.append(time)
+            choice(times_available).click()
+
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
+                    break
+                except TimeoutException:
+                    continue
+
+            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+            next_button.click()
+            self.fifth_step_2()
+
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def fifth_step_2(self):
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.presence_of_element_located((By.ID, r'customer_first_name')))
+                    break
+                except TimeoutException:
+                    continue
+
+            self.driver.execute_script("window.stop();")
+
+            name_input = self.driver.find_element(By.ID, r'customer_first_name')
+            last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
+            phone_number_input = self.driver.find_element(By.ID, r'customer_phone')
+            email_input = self.driver.find_element(By.ID, r'customer_email')
+            name_input.send_keys("mamad")
+            last_name_input.send_keys('vary')
+            phone_number_input.send_keys('9186765242')
+            email_input.send_keys('askldf@gmail.com')
+
+            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+            next_button.click()
+            self.sixth_step_2()
+        except NoSuchWindowException:
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def sixth_step_2(self):
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
+                    break
+                except TimeoutException:
+                    continue
+            self.driver.execute_script("window.stop();")
+
+            self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn').click()
+
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
