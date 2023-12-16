@@ -31,9 +31,13 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name_last_name, phone_number, the_link, index, img_len):
-        self.name_last_name = name_last_name
+    def __init__(self, name, last_name, melli, hessab, phone_number, email_add, the_link, index, img_len):
+        self.name = name
+        self.last_name = last_name
+        self.melli = melli
+        self.hessab = hessab
         self.phone_number = phone_number
+        self.email_add = email_add
         self.the_link = the_link
         self.index = index
         self.img_len = img_len
@@ -43,10 +47,7 @@ class MainProcess:
         option.page_load_strategy = "none"
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
-        if self.the_link == ARYA_LINK:
-            self.first_step_2()
-        else:
-            self.first_step_1()
+        self.first_step_2()
 
     def first_step_1(self):
         """
@@ -247,8 +248,8 @@ class MainProcess:
             hessab_input = self.driver.find_element(By.ID, r'booking_custom_fields_cf_oystg78e')
             checkmark = self.driver.find_element(By.ID, r'booking_custom_fields_cf_xrp7bvqj')
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-btn')
-            melli_input.send_keys('0610322771')
-            hessab_input.send_keys('8005238882201')
+            melli_input.send_keys(self.melli)
+            hessab_input.send_keys(self.hessab)
             checkmark.click()
             next_button.click()
             self.fourth_step_2()
@@ -313,10 +314,10 @@ class MainProcess:
             last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
             phone_number_input = self.driver.find_element(By.ID, r'customer_phone')
             email_input = self.driver.find_element(By.ID, r'customer_email')
-            name_input.send_keys("mamad")
-            last_name_input.send_keys('vary')
-            phone_number_input.send_keys('9186765242')
-            email_input.send_keys('askldf@gmail.com')
+            name_input.send_keys(self.name)
+            last_name_input.send_keys(self.last_name)
+            phone_number_input.send_keys(self.phone_number)
+            email_input.send_keys(self.email_add)
 
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
             next_button.click()
@@ -388,11 +389,23 @@ def get_all_the_info():
         widget.destroy()
     phone_number_func = window.register(validate_phone_number)
 
-    name_and_last_name_label = ttk.Label(text=":نام و نام خانوادگی ", padding=10, justify="right")
-    name_and_last_name_label.grid(row=1, column=amount + 1)
+    name_label = ttk.Label(text=":نام ", padding=10, justify="right")
+    name_label.grid(row=1, column=amount + 1)
+
+    last_name_label = ttk.Label(text=":نام خانوادگی ", padding=10, justify="right")
+    last_name_label.grid(row=2, column=amount + 1)
+
+    melli_code_label = ttk.Label(text=":کد ملی ", padding=10, justify="left")
+    melli_code_label.grid(row=3, column=amount + 1)
+
+    hessab_label = ttk.Label(text=":شماره حساب ارزی ", padding=10, justify="left")
+    hessab_label.grid(row=4, column=amount + 1)
 
     phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
-    phone_number_label.grid(row=2, column=amount + 1)
+    phone_number_label.grid(row=5, column=amount + 1)
+
+    email_label = ttk.Label(text=":ایمیل ", padding=10, justify="left")
+    email_label.grid(row=6, column=amount + 1)
 
     help_button_2 = ttk.Button(window, text="کمک", image=photo, bootstyle='light', width=5,
                                command=lambda: show_help(2))
@@ -402,18 +415,30 @@ def get_all_the_info():
         number_label = ttk.Label(text=i + 1, padding=10)
         number_label.grid(row=0, column=amount - i - 1)
 
-        name_and_last_name_entry = ttk.Entry(width=20, justify="right")
-        name_and_last_name_entry.grid(row=1, column=i)
+        name_entry = ttk.Entry(width=20, justify="right")
+        name_entry.grid(row=1, column=i)
+
+        last_name_entry = ttk.Entry(width=20, justify="right")
+        last_name_entry.grid(row=2, column=i)
+
+        melli_code_entry = ttk.Entry(width=20, justify="left")
+        melli_code_entry.grid(row=3, column=i)
+
+        hessab_entry = ttk.Entry(width=20, justify="left")
+        hessab_entry.grid(row=4, column=i)
 
         phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
-        phone_number_entry.grid(row=2, column=i)
+        phone_number_entry.grid(row=5, column=i)
 
-        all_info.append((name_and_last_name_entry, phone_number_entry))
+        email_entry = ttk.Entry(width=20, justify="left")
+        email_entry.grid(row=6, column=i)
+
+        all_info.append((name_entry, last_name_entry, melli_code_entry, hessab_entry, phone_number_entry, email_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
                               command=lambda: iterate_through(all_info, link=the_link))
     start_button.config(padding=10)
-    start_button.grid(row=3, column=0, columnspan=amount + 1)
+    start_button.grid(row=7, column=0, columnspan=amount + 1)
 
 
 def iterate_through(information, link):
@@ -426,17 +451,19 @@ def iterate_through(information, link):
     i = 1
     information.reverse()
     processes = []
-    user_information = [(info[0].get(), info[1].get()) for info in information]
+    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get(), info[5].get()]
+                        for info in information]
     window.destroy()
     if link == DOLKHANI_LINK:
         img_len = 2
     else:
         img_len = 1
     for info in user_information:
-        if not validate_phone_number(info[1]):
+        if not validate_phone_number(info[4]):
             Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
-        p = multiprocessing.Process(target=MainProcess, args=(info[0], info[1], link, i, img_len))
+        p = multiprocessing.Process(target=MainProcess, args=(info[0], info[1], info[2], info[3], info[4], info[5],
+                                                              link, i, img_len))
         p.start()
         processes.append(p)
         i += 1
