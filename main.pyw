@@ -141,7 +141,7 @@ class MainProcess:
             next_button.click()
             self.fifth_step()
 
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
