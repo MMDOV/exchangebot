@@ -123,6 +123,7 @@ class MainProcess:
                 self.third_step()
             hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
             times_available = []
+            winsound.PlaySound('*', winsound.SND_ASYNC)
             for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
                 if 'is-booked' not in time.get_attribute('class').split(' '):
                     times_available.append(time)
