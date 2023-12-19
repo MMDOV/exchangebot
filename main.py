@@ -1,5 +1,6 @@
 import sys
 import os
+from datetime import datetime, timedelta
 import winsound
 from selenium import webdriver
 from selenium.webdriver.chrome import service
@@ -52,6 +53,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-book-button')))
                     break
                 except TimeoutException:
+                    print('timeout line 55')
                     continue
             self.driver.execute_script("window.stop();")
             first_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-book-button')
@@ -70,6 +72,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
                     break
                 except TimeoutException:
+                    print('timeout line 74')
                     continue
             second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
             second_button.click()
@@ -85,6 +88,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.XPATH, r"//input[@type='number']")))
                     break
                 except TimeoutException:
+                    print('timeout line 90')
                     continue
 
             melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
@@ -110,20 +114,44 @@ class MainProcess:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-months')))
                     break
                 except TimeoutException:
+                    print('timeout line 116')
                     continue
-
-            months = self.driver.find_element(By.CLASS_NAME, r'os-months')
+            today_date = datetime.today().strftime('%Y-%m-%d')
+            tomorrow_date = (datetime.today() + timedelta(1)).strftime('%Y-%m-%d')
+            overmorrow_date = (datetime.today() + timedelta(2)).strftime('%Y-%m-%d')
+            today = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{today_date}']")
+            try:
+                tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
+                overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
+            except NoSuchElementException:
+                self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
+                overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
+            days = [today, tomorrow, overmorrow]
             days_available = []
-            for day in months.find_elements(By.CLASS_NAME, r'os-day'):
+            for day in days:
+                try:
+                    if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
+                            today.find_element(By.CLASS_NAME, r'os-day-number').text):
+                        self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                except TypeError:
+                    pass
                 if 'os-not-available' not in day.get_attribute('class').split(' '):
                     day.click()
                     days_available.append(day)
             if not days_available:
+                print('===========================')
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
                 self.third_step()
+            winsound.PlaySound('*', winsound.SND_ASYNC)
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
+                    break
+                except TimeoutException:
+                    continue
             hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
             times_available = []
-            winsound.PlaySound('*', winsound.SND_ASYNC)
             for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
                 if 'is-booked' not in time.get_attribute('class').split(' '):
                     times_available.append(time)
@@ -136,6 +164,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
                     break
                 except TimeoutException:
+                    print('timeout line 143')
                     continue
 
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
@@ -153,6 +182,7 @@ class MainProcess:
                     self.wait.until(ec.presence_of_element_located((By.XPATH, r"//input[@type='tel']")))
                     break
                 except TimeoutException:
+                    print('timeout line 161')
                     continue
                 except NoSuchElementException:
                     continue
@@ -182,6 +212,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
                     break
                 except TimeoutException:
+                    print('timeout line 191')
                     continue
             self.driver.execute_script("window.stop();")
 
