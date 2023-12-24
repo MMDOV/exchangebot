@@ -1,5 +1,7 @@
 import sys
 import os
+import time
+
 import winsound
 from datetime import datetime, timedelta
 from selenium import webdriver
@@ -53,9 +55,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-book-button')))
                     break
                 except TimeoutException:
-                    print('timeout line 55')
                     continue
-            self.driver.execute_script("window.stop();")
             first_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-book-button')
             first_button.click()
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
@@ -72,7 +72,6 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
                     break
                 except TimeoutException:
-                    print('timeout line 74')
                     continue
             second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
             second_button.click()
@@ -88,7 +87,6 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.XPATH, r"//input[@type='number']")))
                     break
                 except TimeoutException:
-                    print('timeout line 90')
                     continue
 
             melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
@@ -114,7 +112,6 @@ class MainProcess:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-months')))
                     break
                 except TimeoutException:
-                    print('timeout line 116')
                     continue
             today_date = datetime.today().strftime('%Y-%m-%d')
             tomorrow_date = (datetime.today() + timedelta(1)).strftime('%Y-%m-%d')
@@ -140,7 +137,6 @@ class MainProcess:
                     day.click()
                     days_available.append(day)
             if not days_available:
-                print('===========================')
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
                 self.third_step()
             winsound.PlaySound('*', winsound.SND_ASYNC)
@@ -164,7 +160,6 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
                     break
                 except TimeoutException:
-                    print('timeout line 143')
                     continue
 
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
@@ -182,11 +177,9 @@ class MainProcess:
                     self.wait.until(ec.presence_of_element_located((By.XPATH, r"//input[@type='tel']")))
                     break
                 except TimeoutException:
-                    print('timeout line 161')
                     continue
                 except NoSuchElementException:
                     continue
-            self.driver.execute_script("window.stop();")
 
             name_input = self.driver.find_element(By.ID, r'customer_first_name')
             last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
@@ -212,9 +205,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
                     break
                 except TimeoutException:
-                    print('timeout line 191')
                     continue
-            self.driver.execute_script("window.stop();")
 
             self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn').click()
 
