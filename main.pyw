@@ -54,7 +54,7 @@ class MainProcess:
                     break
                 except TimeoutException:
                     continue
-            self.driver.execute_script("window.stop();")
+
             first_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-book-button')
             first_button.click()
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
@@ -179,7 +179,6 @@ class MainProcess:
                     continue
                 except NoSuchElementException:
                     continue
-            self.driver.execute_script("window.stop();")
 
             name_input = self.driver.find_element(By.ID, r'customer_first_name')
             last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
@@ -206,9 +205,9 @@ class MainProcess:
                     break
                 except TimeoutException:
                     continue
-            self.driver.execute_script("window.stop();")
 
-            self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn').click()
+            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+            next_button.click()
 
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
