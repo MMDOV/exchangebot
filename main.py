@@ -210,7 +210,6 @@ class MainProcess:
                 try:
                     next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
                     next_button.click()
-                    print("Click!")
                 except NoSuchElementException:
                     break
 
