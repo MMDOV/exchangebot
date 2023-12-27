@@ -131,7 +131,7 @@ class MainProcess:
                     if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
                             today.find_element(By.CLASS_NAME, r'os-day-number').text):
                         self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
-                except TypeError:
+                except AttributeError:
                     pass
                 if 'os-not-available' not in day.get_attribute('class').split(' '):
                     day.click()
