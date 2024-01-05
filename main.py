@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException, ElementNotInteractableException
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice
@@ -190,8 +190,15 @@ class MainProcess:
             phone_number_input.send_keys(self.phone_number)
             email_input.send_keys(self.email_add)
 
-            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
-            next_button.click()
+            while True:
+                try:
+                    next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+                    next_button.click()
+                except ElementNotInteractableException:
+                    continue
+                except NoSuchElementException:
+                    break
+
             self.sixth_step()
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
