@@ -207,7 +207,12 @@ class MainProcess:
                 except TimeoutException:
                     continue
 
-            self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn').click()
+            while True:
+                try:
+                    next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+                    next_button.click()
+                except NoSuchElementException:
+                    break
 
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
