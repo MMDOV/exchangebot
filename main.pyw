@@ -10,13 +10,14 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException, \
+    ElementNotInteractableException
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.dialogs import Messagebox
-from random import choice
+from random import choice, randint
 import multiprocessing
 
-DOLKHANI_LINK = r'https://dolkhaniexchange.com/appointment/'
+DOLKHANI_LINK = r'https://dolkhaniexchange.com/rezerv/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 route = r'files/chromedriver.exe'
 if getattr(sys, 'frozen', False):
@@ -30,7 +31,7 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name, last_name, melli, hessab, phone_number, email_add, the_link, index):
+    def __init__(self, name, last_name, melli, hessab, phone_number, email_add, the_link, index, delay):
         self.name = name
         self.last_name = last_name
         self.melli = melli
@@ -39,14 +40,19 @@ class MainProcess:
         self.email_add = email_add
         self.the_link = the_link
         self.index = index
+        self.delay = delay
         # Create a new subprocess
-        p = subprocess.Popen([sys.executable, os.path.join(sys._MEIPASS, 'urls.py')], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        time.sleep(5)
+        port = str(randint(1000, 9999))
+        p = subprocess.Popen(
+            [sys.executable, os.path.join(os.path.abspath(sys.path[0]), r"files\urls.py"), self.the_link, port],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        time.sleep(self.delay)
         ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
         # option.add_experimental_option("detach", True)
         option.page_load_strategy = "none"
-        option.add_experimental_option("debuggerAddress", f"127.0.0.1:7777")
+        option.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
         self.driver.maximize_window()
@@ -251,6 +257,14 @@ def validate_number(x) -> bool:
         return False
 
 
+def validate_delay(x) -> bool:
+    """validates that the input is a number and is not a negative number"""
+    if x.isdigit() and int(x) >= 0:
+        return True
+    else:
+        return False
+
+
 def get_all_the_info():
     """
     gets the amount from main window and creates a new window to collect all the info needed
@@ -261,7 +275,11 @@ def get_all_the_info():
     if not validate_number(number_of_appointment_entry.get()):
         Messagebox.show_error(message="لطفا یک شماره بین صفر تا هشت وارد کنید", title=f'ارور')
         return None
+    if not validate_delay(delay_time_entry.get()):
+        Messagebox.show_error(message="لطفا صفر ثانیه یا بیشتر برای تاخیر وارد کنید", title=f'ارور')
+        return None
     amount = int(number_of_appointment_entry.get())
+    delay_time = delay_time_entry.get()
     variable = var.get()
     if variable == 2:
         the_link = ARYA_LINK
@@ -321,14 +339,15 @@ def get_all_the_info():
         all_info.append((name_entry, last_name_entry, melli_code_entry, hessab_entry, phone_number_entry, email_entry))
 
     start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
-                              command=lambda: iterate_through(all_info, link=the_link))
+                              command=lambda: iterate_through(all_info, link=the_link, delay_t=float(delay_time)))
     start_button.config(padding=10)
     start_button.grid(row=7, column=0, columnspan=amount + 1)
 
 
-def iterate_through(information, link):
+def iterate_through(information: list, link: str, delay_t: float):
     """
     iterates through the list of info and gets an appointment for each one
+    :param delay_t: amount of delay for bypassing anti-bot measures
     :param link: the link to give to main
     :param information: all the information including names and phone numbers
     :return: None
@@ -344,7 +363,7 @@ def iterate_through(information, link):
             Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
         p = multiprocessing.Process(target=MainProcess,
-                                    args=(info[0], info[1], info[2], info[3], info[4], info[5], link, i))
+                                    args=(info[0], info[1], info[2], info[3], info[4], info[5], link, i, delay_t))
         p.start()
         processes.append(p)
         i += 1
@@ -371,12 +390,19 @@ if __name__ == '__main__':
     window.config(pady=20, padx=40)
     var = ttk.IntVar()
     digit_func = window.register(validate_number)
+    delay_func = window.register(validate_delay)
 
     number_of_appointment_label = ttk.Label(text=":تعداد نوبت ها", padding=10, justify="right")
     number_of_appointment_label.grid(row=1, column=2)
 
     number_of_appointment_entry = ttk.Entry(width=20, validate="focus", validatecommand=(digit_func, '%P'))
     number_of_appointment_entry.grid(row=1, column=0, columnspan=2)
+
+    delay_time_label = ttk.Label(text=':مقدار زمان تاخیر به ثانیه')
+    delay_time_label.grid(row=2, column=2)
+
+    delay_time_entry = ttk.Entry(width=20, validate='focus', validatecommand=(delay_func, '%P'))
+    delay_time_entry.grid(row=2, column=0, columnspan=2)
 
     radio1 = ttk.Radiobutton(window, text="دولخانی", variable=var, value=1, padding=10)
     radio1.grid(row=0, column=0)
