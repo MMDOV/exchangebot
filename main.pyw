@@ -1,5 +1,7 @@
 import sys
 import os
+import subprocess
+import time
 from datetime import datetime, timedelta
 import winsound
 from selenium import webdriver
@@ -37,17 +39,21 @@ class MainProcess:
         self.email_add = email_add
         self.the_link = the_link
         self.index = index
+        # Create a new subprocess
+        p = subprocess.Popen([sys.executable, os.path.join(sys._MEIPASS, 'urls.py')], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        time.sleep(5)
         ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
-        option.add_experimental_option("detach", True)
+        # option.add_experimental_option("detach", True)
         option.page_load_strategy = "none"
+        option.add_experimental_option("debuggerAddress", f"127.0.0.1:7777")
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
+        self.driver.maximize_window()
         self.first_step()
 
     def first_step(self):
         try:
-            self.driver.get(self.the_link)
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-book-button')))
