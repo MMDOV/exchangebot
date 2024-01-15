@@ -57,9 +57,6 @@ class MainProcess:
 
     def open_url(self):
         """opens the link in a separate process, this is done to bypass any kind of anti-bot measure"""
-        # link = sys.argv[1]
-        # port = sys.argv[2]
-        # Messagebox.show_info(f'link: {self.the_link}\nport: {self.port}')
         with chdir('C:/Program Files/Google/Chrome/Application'):
             os.system(f'chrome.exe {self.the_link} --remote-debugging-port={self.port}'
                       f' --user-data-dir="C:\selenum\ChromeProfile\\session_{self.index}"')
