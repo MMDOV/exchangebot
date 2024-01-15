@@ -1,12 +1,12 @@
 import sys
 import os
-import subprocess
+from contextlib import chdir
 import time
 from datetime import datetime, timedelta
 import winsound
 from selenium import webdriver
 from selenium.webdriver.chrome import service
-from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
@@ -41,22 +41,28 @@ class MainProcess:
         self.the_link = the_link
         self.index = index
         self.delay = delay
-        # Create a new subprocess
-        port = str(randint(1000, 9999))
-        p = subprocess.Popen(
-            [sys.executable, os.path.join(os.path.abspath(sys.path[0]), r"files\urls.py"), self.the_link, port],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
+        self.port = str(randint(1000, 9999))
+        p = multiprocessing.Process(target=self.open_url)
+        p.start()
         time.sleep(self.delay)
         ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
         # option.add_experimental_option("detach", True)
         option.page_load_strategy = "none"
-        option.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
+        option.add_experimental_option("debuggerAddress", f"127.0.0.1:{self.port}")
         self.driver = webdriver.Chrome(service=ser, options=option)
         self.wait = WebDriverWait(self.driver, 20)
-        self.driver.maximize_window()
+        # self.driver.maximize_window()
         self.first_step()
+
+    def open_url(self):
+        """opens the link in a separate process, this is done to bypass any kind of anti-bot measure"""
+        # link = sys.argv[1]
+        # port = sys.argv[2]
+        # Messagebox.show_info(f'link: {self.the_link}\nport: {self.port}')
+        with chdir('C:/Program Files/Google/Chrome/Application'):
+            os.system(f'chrome.exe {self.the_link} --remote-debugging-port={self.port}'
+                      f' --user-data-dir="C:\selenum\ChromeProfile\\session_{self.index}"')
 
     def first_step(self):
         try:
@@ -231,6 +237,7 @@ class MainProcess:
                     next_button.click()
                 except NoSuchElementException:
                     break
+            self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'latepoint-lightbox-close')))
 
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
@@ -288,60 +295,63 @@ def get_all_the_info():
     else:
         Messagebox.show_error(message="لطفا یکی از صرافی ها را انتخاب کنید", title="ارور")
         return None
-    for widget in window.winfo_children():
-        widget.destroy()
-    phone_number_func = window.register(validate_phone_number)
+    if __name__ == '__main__':
+        multiprocessing.freeze_support()
+        for widget in window.winfo_children():
+            widget.destroy()
+        phone_number_func = window.register(validate_phone_number)
 
-    name_label = ttk.Label(text=":نام ", padding=10, justify="right")
-    name_label.grid(row=1, column=amount + 1)
+        name_label = ttk.Label(text=":نام ", padding=10, justify="right")
+        name_label.grid(row=1, column=amount + 1)
 
-    last_name_label = ttk.Label(text=":نام خانوادگی ", padding=10, justify="right")
-    last_name_label.grid(row=2, column=amount + 1)
+        last_name_label = ttk.Label(text=":نام خانوادگی ", padding=10, justify="right")
+        last_name_label.grid(row=2, column=amount + 1)
 
-    melli_code_label = ttk.Label(text=":کد ملی ", padding=10, justify="left")
-    melli_code_label.grid(row=3, column=amount + 1)
+        melli_code_label = ttk.Label(text=":کد ملی ", padding=10, justify="left")
+        melli_code_label.grid(row=3, column=amount + 1)
 
-    hessab_label = ttk.Label(text=":شماره حساب ارزی ", padding=10, justify="left")
-    hessab_label.grid(row=4, column=amount + 1)
+        hessab_label = ttk.Label(text=":شماره حساب ارزی ", padding=10, justify="left")
+        hessab_label.grid(row=4, column=amount + 1)
 
-    phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
-    phone_number_label.grid(row=5, column=amount + 1)
+        phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
+        phone_number_label.grid(row=5, column=amount + 1)
 
-    email_label = ttk.Label(text=":ایمیل ", padding=10, justify="left")
-    email_label.grid(row=6, column=amount + 1)
+        email_label = ttk.Label(text=":ایمیل ", padding=10, justify="left")
+        email_label.grid(row=6, column=amount + 1)
 
-    help_button_2 = ttk.Button(window, text="کمک", image=photo, bootstyle='light', width=5,
-                               command=lambda: show_help(2))
-    help_button_2.grid(row=0, column=amount + 1)
+        help_button_2 = ttk.Button(window, text="کمک", image=photo, bootstyle='light', width=5,
+                                   command=lambda: show_help(2))
+        help_button_2.grid(row=0, column=amount + 1)
 
-    for i in range(amount):
-        number_label = ttk.Label(text=i + 1, padding=10)
-        number_label.grid(row=0, column=amount - i - 1)
+        for i in range(amount):
+            number_label = ttk.Label(text=i + 1, padding=10)
+            number_label.grid(row=0, column=amount - i - 1)
 
-        name_entry = ttk.Entry(width=20, justify="right")
-        name_entry.grid(row=1, column=i)
+            name_entry = ttk.Entry(width=20, justify="right")
+            name_entry.grid(row=1, column=i)
 
-        last_name_entry = ttk.Entry(width=20, justify="right")
-        last_name_entry.grid(row=2, column=i)
+            last_name_entry = ttk.Entry(width=20, justify="right")
+            last_name_entry.grid(row=2, column=i)
 
-        melli_code_entry = ttk.Entry(width=20, justify="left")
-        melli_code_entry.grid(row=3, column=i)
+            melli_code_entry = ttk.Entry(width=20, justify="left")
+            melli_code_entry.grid(row=3, column=i)
 
-        hessab_entry = ttk.Entry(width=20, justify="left")
-        hessab_entry.grid(row=4, column=i)
+            hessab_entry = ttk.Entry(width=20, justify="left")
+            hessab_entry.grid(row=4, column=i)
 
-        phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
-        phone_number_entry.grid(row=5, column=i)
+            phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
+            phone_number_entry.grid(row=5, column=i)
 
-        email_entry = ttk.Entry(width=20, justify="left")
-        email_entry.grid(row=6, column=i)
+            email_entry = ttk.Entry(width=20, justify="left")
+            email_entry.grid(row=6, column=i)
 
-        all_info.append((name_entry, last_name_entry, melli_code_entry, hessab_entry, phone_number_entry, email_entry))
+            all_info.append(
+                (name_entry, last_name_entry, melli_code_entry, hessab_entry, phone_number_entry, email_entry))
 
-    start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
-                              command=lambda: iterate_through(all_info, link=the_link, delay_t=float(delay_time)))
-    start_button.config(padding=10)
-    start_button.grid(row=7, column=0, columnspan=amount + 1)
+        start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
+                                  command=lambda: iterate_through(all_info, link=the_link, delay_t=float(delay_time)))
+        start_button.config(padding=10)
+        start_button.grid(row=7, column=0, columnspan=amount + 1)
 
 
 def iterate_through(information: list, link: str, delay_t: float):
@@ -357,7 +367,6 @@ def iterate_through(information: list, link: str, delay_t: float):
     processes = []
     user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get(), info[5].get()]
                         for info in information]
-    window.destroy()
     for info in user_information:
         if not validate_phone_number(info[4]):
             Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
