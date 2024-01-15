@@ -316,7 +316,7 @@ def get_all_the_info():
         email_label = tk.Label(text=":ایمیل ", padx=10, pady=10, justify="left")
         email_label.grid(row=6, column=amount + 1)
 
-        help_button_2 = tk.Button(window, text="کمک", image=photo, width=5,
+        help_button_2 = tk.Button(window, text="کمک", image=photo, width=16,
                                   command=lambda: show_help(2))
         help_button_2.grid(row=0, column=amount + 1)
 
@@ -420,7 +420,7 @@ if __name__ == '__main__':
         photo = tk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16)
     else:
         photo = tk.PhotoImage(file=r"files/question.png", width=16, height=16)
-    help_button_1 = tk.Button(window, text="کمک", image=photo, width=5,
+    help_button_1 = tk.Button(window, text="کمک", image=photo, width=16,
                               command=lambda: show_help(1))
     help_button_1.grid(row=0, column=2)
 
