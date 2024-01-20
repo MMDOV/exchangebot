@@ -1,6 +1,6 @@
 import sys
 import os
-from contextlib import chdir
+from contextlib_chdir import chdir
 import time
 from datetime import datetime, timedelta
 import winsound
