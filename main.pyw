@@ -62,6 +62,7 @@ class MainProcess:
                       f' --user-data-dir="C:\selenum\ChromeProfile\\session_{self.index}"')
 
     def first_step(self):
+        """opens the link and clicks on a button and makes sure that the next step is loading"""
         try:
             while True:
                 try:
@@ -80,6 +81,7 @@ class MainProcess:
             sys.exit()
 
     def second_step(self):
+        """waits for the next page clicks the button"""
         try:
             while True:
                 try:
@@ -95,6 +97,7 @@ class MainProcess:
             sys.exit()
 
     def third_step(self):
+        """waits for the page to load, inputs some info and clicks the next button"""
         try:
             while True:
                 try:
@@ -120,6 +123,8 @@ class MainProcess:
             sys.exit()
 
     def fourth_step(self):
+        """waits for the page to load checks if there is any available time in the next 3 days
+         if so makes a small notification sound, picks them and goes to the next page"""
         try:
             while True:
                 try:
@@ -185,6 +190,7 @@ class MainProcess:
             sys.exit()
 
     def fifth_step(self):
+        """waits for the page to load inputs some info then clicks the next button"""
         try:
             while True:
                 try:
@@ -220,6 +226,7 @@ class MainProcess:
             sys.exit()
 
     def sixth_step(self):
+        """clicks the end button and waits for user to close the window or the page to be closed"""
         try:
             while True:
                 try:
@@ -390,6 +397,7 @@ def show_help(x):
 
 # ----------------------------------------------UI------------------------------------------------ #
 if __name__ == '__main__':
+    # This is the main UI and all of its elements
     multiprocessing.freeze_support()
     window = ttk.Window()
     window.title("ربات گرفتن نوبت صرافی")
