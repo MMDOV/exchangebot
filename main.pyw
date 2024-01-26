@@ -17,7 +17,7 @@ from tkinter import messagebox
 from random import choice, randint
 import multiprocessing
 
-DOLKHANI_LINK = r'https://dolkhaniexchange.com/rezerv/'
+DOLKHANI_LINK = r'https://dolkhaniexchange.com/'
 ARYA_LINK = r'https://exarya.ir/appointment/'
 route = r'files/chromedriver.exe'
 if getattr(sys, 'frozen', False):
@@ -89,35 +89,35 @@ class MainProcess:
                     continue
             second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
             second_button.click()
-            self.third_step()
-        except NoSuchWindowException:
-            messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
-            sys.exit()
-
-    def third_step(self):
-        try:
-            while True:
-                try:
-                    self.wait.until(ec.element_to_be_clickable((By.XPATH, r"//input[@type='number']")))
-                    break
-                except TimeoutException:
-                    continue
-
-            melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
-
-            melli_input = melli_hessab[0]
-            hessab_input = melli_hessab[1]
-            checkmark = self.driver.find_element(By.XPATH, r"//input[@type='checkbox']")
-            if melli_input.get_attribute('value') == '' and hessab_input.get_attribute('value') == '':
-                melli_input.send_keys(self.melli)
-                hessab_input.send_keys(self.hessab)
-                checkmark.click()
-            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
-            next_button.click()
             self.fourth_step()
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
+
+    # def third_step(self):
+    #     try:
+    #         while True:
+    #             try:
+    #                 self.wait.until(ec.element_to_be_clickable((By.XPATH, r"//input[@type='number']")))
+    #                 break
+    #             except TimeoutException:
+    #                 continue
+    #
+    #         melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
+    #
+    #         melli_input = melli_hessab[0]
+    #         hessab_input = melli_hessab[1]
+    #         checkmark = self.driver.find_element(By.XPATH, r"//input[@type='checkbox']")
+    #         if melli_input.get_attribute('value') == '' and hessab_input.get_attribute('value') == '':
+    #             melli_input.send_keys(self.melli)
+    #             hessab_input.send_keys(self.hessab)
+    #             checkmark.click()
+    #         next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+    #         next_button.click()
+    #         self.fourth_step()
+    #     except NoSuchWindowException:
+    #         messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+    #         sys.exit()
 
     def fourth_step(self):
         try:
@@ -152,7 +152,7 @@ class MainProcess:
                     days_available.append(day)
             if not days_available:
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
-                self.third_step()
+                self.second_step()
             winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
@@ -199,6 +199,13 @@ class MainProcess:
             last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
             phone_number_input = self.driver.find_element(By.XPATH, r"//input[@type='tel']")
             email_input = self.driver.find_element(By.ID, r'customer_email')
+
+            melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
+
+            melli_input = melli_hessab[0]
+            hessab_input = melli_hessab[1]
+            melli_input.send_keys(self.melli)
+            hessab_input.send_keys(self.hessab)
 
             name_input.send_keys(self.name)
             last_name_input.send_keys(self.last_name)
