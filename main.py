@@ -11,14 +11,14 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException, \
-    ElementNotInteractableException
+    ElementNotInteractableException, StaleElementReferenceException, ElementClickInterceptedException
 import tkinter as tk
 from tkinter import messagebox
 from random import choice, randint
 import multiprocessing
 
-DOLKHANI_LINK = r'https://dolkhaniexchange.com/'
-ARYA_LINK = r'https://exarya.ir/appointment/'
+DOLKHANI_LINK = r'https://dolkhaniexchange.com'
+ARYA_LINK = r'https://exarya.com'
 route = r'files/chromedriver.exe'
 if getattr(sys, 'frozen', False):
     WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
@@ -31,11 +31,9 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name, last_name, melli, hessab, phone_number, email_add, the_link, index, delay):
+    def __init__(self, name, last_name, phone_number, email_add, the_link, index, delay):
         self.name = name
         self.last_name = last_name
-        self.melli = melli
-        self.hessab = hessab
         self.phone_number = phone_number
         self.email_add = email_add
         self.the_link = the_link
@@ -66,12 +64,12 @@ class MainProcess:
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-book-button')))
+                    first_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-book-button')
+                    first_button.click()
                     break
-                except TimeoutException:
+                except (TimeoutException, ElementClickInterceptedException):
                     continue
 
-            first_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-book-button')
-            first_button.click()
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
                 self.first_step()
             self.second_step()
@@ -83,49 +81,32 @@ class MainProcess:
         try:
             while True:
                 try:
-                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-lightbox-close')))
                     break
                 except TimeoutException:
+                    print("timeout 96")
                     continue
-            second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
-            second_button.click()
-            self.fourth_step()
+            try:
+                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
+                second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
+                second_button.click()
+            except NoSuchElementException:
+                close_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-lightbox-close')
+                close_button.click()
+                self.first_step()
+            self.third_step()
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-    # def third_step(self):
-    #     try:
-    #         while True:
-    #             try:
-    #                 self.wait.until(ec.element_to_be_clickable((By.XPATH, r"//input[@type='number']")))
-    #                 break
-    #             except TimeoutException:
-    #                 continue
-    #
-    #         melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
-    #
-    #         melli_input = melli_hessab[0]
-    #         hessab_input = melli_hessab[1]
-    #         checkmark = self.driver.find_element(By.XPATH, r"//input[@type='checkbox']")
-    #         if melli_input.get_attribute('value') == '' and hessab_input.get_attribute('value') == '':
-    #             melli_input.send_keys(self.melli)
-    #             hessab_input.send_keys(self.hessab)
-    #             checkmark.click()
-    #         next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
-    #         next_button.click()
-    #         self.fourth_step()
-    #     except NoSuchWindowException:
-    #         messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
-    #         sys.exit()
-
-    def fourth_step(self):
+    def third_step(self):
         try:
             while True:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-months')))
                     break
                 except TimeoutException:
+                    print("timeout 116")
                     continue
             today_date = datetime.today().strftime('%Y-%m-%d')
             tomorrow_date = (datetime.today() + timedelta(1)).strftime('%Y-%m-%d')
@@ -140,25 +121,33 @@ class MainProcess:
                 overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
             days = [today, tomorrow, overmorrow]
             days_available = []
-            for day in days:
+            while True:
                 try:
-                    if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
-                            today.find_element(By.CLASS_NAME, r'os-day-number').text):
-                        self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
-                except TypeError:
+                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
+                    for day in days:
+                        try:
+                            if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
+                                    today.find_element(By.CLASS_NAME, r'os-day-number').text):
+                                self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                        except TypeError:
+                            pass
+                        if 'os-not-available' not in day.get_attribute('class').split(' '):
+                            day.click()
+                            days_available.append(day)
+                    if not days_available:
+                        self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
+                        self.second_step()
+                    winsound.PlaySound('*', winsound.SND_ASYNC)
+                    break
+                except StaleElementReferenceException:
+                    print("stale")
                     pass
-                if 'os-not-available' not in day.get_attribute('class').split(' '):
-                    day.click()
-                    days_available.append(day)
-            if not days_available:
-                self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
-                self.second_step()
-            winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
                     break
                 except TimeoutException:
+                    print("timeout 152")
                     continue
             hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
             times_available = []
@@ -174,17 +163,18 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
                     break
                 except TimeoutException:
+                    print("timeout 173")
                     continue
 
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
             next_button.click()
-            self.fifth_step()
+            self.fourth_step()
 
         except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-    def fifth_step(self):
+    def fourth_step(self):
         try:
             while True:
                 try:
@@ -195,22 +185,24 @@ class MainProcess:
                 except NoSuchElementException:
                     continue
 
+            random_notes = ["عالی بود",
+                            "خوب بود",
+                            "دوست داشتم",
+                            "سرعت سایت یکم پایینه",
+                            "کم سایت رو عوض کنید", ]
+
             name_input = self.driver.find_element(By.ID, r'customer_first_name')
             last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
             phone_number_input = self.driver.find_element(By.XPATH, r"//input[@type='tel']")
             email_input = self.driver.find_element(By.ID, r'customer_email')
-
-            melli_hessab = self.driver.find_elements(By.XPATH, r"//input[@type='number']")
-
-            melli_input = melli_hessab[0]
-            hessab_input = melli_hessab[1]
-            melli_input.send_keys(self.melli)
-            hessab_input.send_keys(self.hessab)
+            customer_notes = self.driver.find_element(By.TAG_NAME, r'textarea')
 
             name_input.send_keys(self.name)
             last_name_input.send_keys(self.last_name)
             phone_number_input.send_keys(self.phone_number)
             email_input.send_keys(self.email_add)
+            random_note = choice(random_notes)
+            customer_notes.send_keys(random_note)
 
             while True:
                 try:
@@ -220,13 +212,15 @@ class MainProcess:
                     continue
                 except NoSuchElementException:
                     break
+                except Exception:
+                    raise NoSuchWindowException
 
-            self.sixth_step()
+            self.fifth_step()
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-    def sixth_step(self):
+    def fifth_step(self):
         try:
             while True:
                 try:
@@ -241,7 +235,24 @@ class MainProcess:
                     next_button.click()
                 except NoSuchElementException:
                     break
-            self.wait.until(ec.invisibility_of_element_located((By.CLASS_NAME, r'latepoint-lightbox-close')))
+            try:
+                self.wait.until(ec.invisibility_of_element((By.CLASS_NAME, r'latepoint-next-btn')))
+            except Exception:
+                pass
+            # sale_id = str(uuid.uuid4())
+            #
+            # # Get the current date and time
+            # sale_time = datetime.now()
+            #
+            # # Create the sale info document
+            # sale_info = {
+            #     "_id": sale_id,
+            #     "time": sale_time
+            # }
+            #
+            # # Insert the sale info into the 'sales' collection
+            # sale_collection = db["sales"]
+            # sale_collection.insert_one(sale_info)
 
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
@@ -311,17 +322,11 @@ def get_all_the_info():
         last_name_label = tk.Label(text=":نام خانوادگی ", padx=10, pady=10, justify="right")
         last_name_label.grid(row=2, column=amount + 1)
 
-        melli_code_label = tk.Label(text=":کد ملی ", padx=10, pady=10, justify="left")
-        melli_code_label.grid(row=3, column=amount + 1)
-
-        hessab_label = tk.Label(text=":شماره حساب ارزی ", padx=10, pady=10, justify="left")
-        hessab_label.grid(row=4, column=amount + 1)
-
         phone_number_label = tk.Label(text=":شماره موبایل", padx=10, pady=10, justify="right")
-        phone_number_label.grid(row=5, column=amount + 1)
+        phone_number_label.grid(row=3, column=amount + 1)
 
         email_label = tk.Label(text=":ایمیل ", padx=10, pady=10, justify="left")
-        email_label.grid(row=6, column=amount + 1)
+        email_label.grid(row=4, column=amount + 1)
 
         help_button_2 = tk.Button(window, text="کمک", image=photo, width=16,
                                   command=lambda: show_help(2))
@@ -337,25 +342,19 @@ def get_all_the_info():
             last_name_entry = tk.Entry(width=20, justify="right")
             last_name_entry.grid(row=2, column=i)
 
-            melli_code_entry = tk.Entry(width=20, justify="left")
-            melli_code_entry.grid(row=3, column=i)
-
-            hessab_entry = tk.Entry(width=20, justify="left")
-            hessab_entry.grid(row=4, column=i)
-
             phone_number_entry = tk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
-            phone_number_entry.grid(row=5, column=i)
+            phone_number_entry.grid(row=3, column=i)
 
             email_entry = tk.Entry(width=20, justify="left")
-            email_entry.grid(row=6, column=i)
+            email_entry.grid(row=4, column=i)
 
             all_info.append(
-                (name_entry, last_name_entry, melli_code_entry, hessab_entry, phone_number_entry, email_entry))
+                (name_entry, last_name_entry, phone_number_entry, email_entry))
 
         start_button = tk.Button(text="شروع", width=20,
                                  command=lambda: iterate_through(all_info, link=the_link, delay_t=float(delay_time)))
         start_button.config(padx=10, pady=10)
-        start_button.grid(row=7, column=0, columnspan=amount + 1)
+        start_button.grid(row=5, column=0, columnspan=amount + 1)
 
 
 def iterate_through(information: list, link: str, delay_t: float):
@@ -369,14 +368,14 @@ def iterate_through(information: list, link: str, delay_t: float):
     i = 1
     information.reverse()
     processes = []
-    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get(), info[5].get()]
+    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get()]
                         for info in information]
     for info in user_information:
-        if not validate_phone_number(info[4]):
+        if not validate_phone_number(info[2]):
             messagebox.showerror(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
         p = multiprocessing.Process(target=MainProcess,
-                                    args=(info[0], info[1], info[2], info[3], info[4], info[5], link, i, delay_t))
+                                    args=(info[0], info[1], info[2], info[3], link, i, delay_t))
         p.start()
         processes.append(p)
         i += 1
@@ -424,9 +423,9 @@ if __name__ == '__main__':
     radio2.grid(row=0, column=1)
 
     if getattr(sys, 'frozen', False):
-        photo = tk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16)
+        photo = tk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16, master=window)
     else:
-        photo = tk.PhotoImage(file=r"files/question.png", width=16, height=16)
+        photo = tk.PhotoImage(file=r"files/question.png", width=16, height=16, master=window)
     help_button_1 = tk.Button(window, text="کمک", image=photo, width=16,
                               command=lambda: show_help(1))
     help_button_1.grid(row=0, column=2)
