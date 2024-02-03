@@ -31,11 +31,9 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name, last_name, melli, hessab, phone_number, email_add, the_link, index, delay):
+    def __init__(self, name, last_name, phone_number, email_add, the_link, index, delay):
         self.name = name
         self.last_name = last_name
-        self.melli = melli
-        self.hessab = hessab
         self.phone_number = phone_number
         self.email_add = email_add
         self.the_link = the_link
@@ -70,6 +68,7 @@ class MainProcess:
                     first_button.click()
                     break
                 except (TimeoutException, ElementClickInterceptedException):
+                    Messagebox.show_error("error line 73")
                     continue
 
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
@@ -89,8 +88,8 @@ class MainProcess:
                     print("timeout 96")
                     continue
             try:
-                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
                 second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
+                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
                 second_button.click()
             except NoSuchElementException:
                 close_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-lightbox-close')

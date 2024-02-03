@@ -68,6 +68,7 @@ class MainProcess:
                     first_button.click()
                     break
                 except (TimeoutException, ElementClickInterceptedException):
+                    Messagebox.show_error("error line 73")
                     continue
 
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
@@ -87,8 +88,8 @@ class MainProcess:
                     print("timeout 96")
                     continue
             try:
-                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
                 second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
+                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'os-service-selector')))
                 second_button.click()
             except NoSuchElementException:
                 close_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-lightbox-close')
