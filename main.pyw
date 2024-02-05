@@ -68,7 +68,6 @@ class MainProcess:
                     first_button.click()
                     break
                 except (TimeoutException, ElementClickInterceptedException):
-                    Messagebox.show_error("error line 73")
                     continue
 
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
