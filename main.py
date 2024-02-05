@@ -43,12 +43,12 @@ class MainProcess:
         p = multiprocessing.Process(target=self.open_url)
         p.start()
         time.sleep(self.delay)
-        # ser = service.Service(executable_path=WEBDRIVER_PATH)
+        ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
         # option.add_experimental_option("detach", True)
         option.page_load_strategy = "none"
         option.add_experimental_option("debuggerAddress", f"127.0.0.1:{self.port}")
-        self.driver = webdriver.Chrome(options=option)
+        self.driver = webdriver.Chrome(options=option, service=ser)
         self.wait = WebDriverWait(self.driver, 20)
         # self.driver.maximize_window()
         self.first_step()
@@ -121,27 +121,21 @@ class MainProcess:
                 overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
             days = [today, tomorrow, overmorrow]
             days_available = []
-            while True:
+            self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
+            for day in days:
                 try:
-                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
-                    for day in days:
-                        try:
-                            if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
-                                    today.find_element(By.CLASS_NAME, r'os-day-number').text):
-                                self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
-                        except TypeError:
-                            pass
-                        if 'os-not-available' not in day.get_attribute('class').split(' '):
-                            day.click()
-                            days_available.append(day)
-                    if not days_available:
-                        self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
-                        self.second_step()
-                    winsound.PlaySound('*', winsound.SND_ASYNC)
-                    break
-                except StaleElementReferenceException:
-                    print("stale")
+                    if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
+                            today.find_element(By.CLASS_NAME, r'os-day-number').text):
+                        self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                except TypeError:
                     pass
+                if 'os-not-available' not in day.get_attribute('class').split(' '):
+                    day.click()
+                    days_available.append(day)
+            if not days_available:
+                self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
+                self.second_step()
+            winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
@@ -219,6 +213,8 @@ class MainProcess:
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
+        except Exception as e:
+            Messagebox.show_error(e)
 
     def fifth_step(self):
         try:
