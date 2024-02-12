@@ -103,7 +103,7 @@ class MainProcess:
         try:
             while True:
                 try:
-                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-months')))
+                    self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
                     break
                 except TimeoutException:
                     print("timeout 116")
@@ -130,6 +130,7 @@ class MainProcess:
                 except TypeError:
                     pass
                 if 'os-not-available' not in day.get_attribute('class').split(' '):
+                    self.wait.until(ec.element_to_be_clickable(day))
                     day.click()
                     days_available.append(day)
             if not days_available:
