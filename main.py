@@ -31,11 +31,12 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name, last_name, phone_number, email_add, the_link, index, delay):
+    def __init__(self, name, melli, phone_number, email_add, hessab, the_link, index, delay):
         self.name = name
-        self.last_name = last_name
+        self.melli = melli
         self.phone_number = phone_number
         self.email_add = email_add
+        self.hessab = hessab
         self.the_link = the_link
         self.index = index
         self.delay = delay
@@ -51,7 +52,7 @@ class MainProcess:
         self.driver = webdriver.Chrome(options=option, service=ser)
         self.wait = WebDriverWait(self.driver, 20)
         # self.driver.maximize_window()
-        self.first_step()
+        self.fourth_step()
 
     def open_url(self):
         """opens the link in a separate process, this is done to bypass any kind of anti-bot measure"""
@@ -142,7 +143,6 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
                     break
                 except TimeoutException:
-                    print("timeout 152")
                     continue
             hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
             times_available = []
@@ -158,7 +158,6 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
                     break
                 except TimeoutException:
-                    print("timeout 173")
                     continue
 
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
@@ -171,6 +170,10 @@ class MainProcess:
 
     def fourth_step(self):
         try:
+            self.driver.get(
+                r'file:///C:/Users/moham/Downloads/Telegram%20Desktop/%D9%88%D8%A8%20%D8%B3%D8%A7%DB%8C%D8%AA%20%D8'
+                r'%B1%D8%B3%D9%85%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C'
+                r'.html')
             while True:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.XPATH, r"//input[@type='tel']")))
@@ -180,24 +183,22 @@ class MainProcess:
                 except NoSuchElementException:
                     continue
 
-            random_notes = ["عالی بود",
-                            "خوب بود",
-                            "دوست داشتم",
-                            "سرعت سایت یکم پایینه",
-                            "کم سایت رو عوض کنید", ]
-
-            name_input = self.driver.find_element(By.ID, r'customer_first_name')
-            last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
-            phone_number_input = self.driver.find_element(By.XPATH, r"//input[@type='tel']")
-            email_input = self.driver.find_element(By.ID, r'customer_email')
-            customer_notes = self.driver.find_element(By.TAG_NAME, r'textarea')
-
+            melli_input = self.driver.find_element(By.ID, r'customer_first_name')
+            melli_input.clear()
+            melli_input.send_keys(self.melli)
+            name_input = self.driver.find_element(By.ID, r'customer_last_name')
+            name_input.clear()
             name_input.send_keys(self.name)
-            last_name_input.send_keys(self.last_name)
+            phone_number_input = self.driver.find_element(By.ID, r"customer_phone")
+            phone_number_input.clear()
             phone_number_input.send_keys(self.phone_number)
+            email_input = self.driver.find_element(By.ID, r'customer_email')
+            email_input.clear()
             email_input.send_keys(self.email_add)
-            random_note = choice(random_notes)
-            customer_notes.send_keys(random_note)
+            if self.the_link == ARYA_LINK:
+                hessab_input = self.driver.find_element(By.ID, r'customer_notes')
+                hessab_input.clear()
+                hessab_input.send_keys(self.hessab)
 
             while True:
                 try:
@@ -209,8 +210,8 @@ class MainProcess:
                     break
                 except Exception:
                     raise NoSuchWindowException
-
-            self.fifth_step()
+            if self.the_link == ARYA_LINK:
+                self.fifth_step()
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
@@ -232,10 +233,6 @@ class MainProcess:
                     next_button.click()
                 except NoSuchElementException:
                     break
-            try:
-                self.wait.until(ec.invisibility_of_element((By.CLASS_NAME, r'latepoint-next-btn')))
-            except Exception:
-                pass
         except NoSuchWindowException:
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
@@ -298,17 +295,21 @@ def get_all_the_info():
             widget.destroy()
         phone_number_func = window.register(validate_phone_number)
 
-        name_label = ttk.Label(text=":نام ", padding=10, justify="right")
+        name_label = ttk.Label(text=":نام و نام خانوادگی", padding=10, justify="right")
         name_label.grid(row=1, column=amount + 1)
 
-        last_name_label = ttk.Label(text=":نام خانوادگی ", padding=10, justify="right")
-        last_name_label.grid(row=2, column=amount + 1)
+        melli_label = ttk.Label(text=":کد ملی ", padding=10, justify="right")
+        melli_label.grid(row=2, column=amount + 1)
 
         phone_number_label = ttk.Label(text=":شماره موبایل", padding=10, justify="right")
         phone_number_label.grid(row=3, column=amount + 1)
 
         email_label = ttk.Label(text=":ایمیل ", padding=10, justify="left")
         email_label.grid(row=4, column=amount + 1)
+
+        hessab_label = ttk.Label(text=":شماره حساب", padding=10, justify="right")
+        if the_link == ARYA_LINK:
+            hessab_label.grid(row=5, column=amount + 1)
 
         help_button_2 = ttk.Button(window, text="کمک", image=photo, bootstyle='light', width=5,
                                    command=lambda: show_help(2))
@@ -321,8 +322,8 @@ def get_all_the_info():
             name_entry = ttk.Entry(width=20, justify="right")
             name_entry.grid(row=1, column=i)
 
-            last_name_entry = ttk.Entry(width=20, justify="right")
-            last_name_entry.grid(row=2, column=i)
+            melli_entry = ttk.Entry(width=20, justify="right")
+            melli_entry.grid(row=2, column=i)
 
             phone_number_entry = ttk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
             phone_number_entry.grid(row=3, column=i)
@@ -330,13 +331,17 @@ def get_all_the_info():
             email_entry = ttk.Entry(width=20, justify="left")
             email_entry.grid(row=4, column=i)
 
+            hessab_entry = ttk.Entry(width=20, justify="left")
+            if the_link == ARYA_LINK:
+                hessab_entry.grid(row=5, column=i)
+
             all_info.append(
-                (name_entry, last_name_entry, phone_number_entry, email_entry))
+                (name_entry, melli_entry, phone_number_entry, email_entry, hessab_entry))
 
         start_button = ttk.Button(text="شروع", width=20, bootstyle='dark',
                                   command=lambda: iterate_through(all_info, link=the_link, delay_t=float(delay_time)))
         start_button.config(padding=10)
-        start_button.grid(row=5, column=0, columnspan=amount + 1)
+        start_button.grid(row=6, column=0, columnspan=amount + 1)
 
 
 def iterate_through(information: list, link: str, delay_t: float):
@@ -350,14 +355,14 @@ def iterate_through(information: list, link: str, delay_t: float):
     i = 1
     information.reverse()
     processes = []
-    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get()]
+    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get()]
                         for info in information]
     for info in user_information:
         if not validate_phone_number(info[2]):
             Messagebox.show_error(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
         p = multiprocessing.Process(target=MainProcess,
-                                    args=(info[0], info[1], info[2], info[3], link, i, delay_t))
+                                    args=(info[0], info[1], info[2], info[3], info[4], link, i, delay_t))
         p.start()
         processes.append(p)
         i += 1
@@ -406,7 +411,8 @@ if __name__ == '__main__':
     radio2.grid(row=0, column=1)
 
     if getattr(sys, 'frozen', False):
-        photo = ttk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16, master=window)
+        photo = ttk.PhotoImage(file=os.path.join(sys._MEIPASS, "files/question.png"), width=16, height=16,
+                               master=window)
     else:
         photo = ttk.PhotoImage(file=r"files/question.png", width=16, height=16, master=window)
     help_button_1 = ttk.Button(window, text="کمک", image=photo, width=5, bootstyle="light",
