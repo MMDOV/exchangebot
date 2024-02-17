@@ -307,7 +307,7 @@ def get_all_the_info():
         if the_link == ARYA_LINK:
             hessab_label.grid(row=5, column=amount + 1)
 
-        help_button_2 = tk.Button(window, text="کمک", image=photo, width=5,
+        help_button_2 = tk.Button(window, text="کمک", image=photo, width=16,
                                   command=lambda: show_help(2))
         help_button_2.grid(row=0, column=amount + 1)
 
