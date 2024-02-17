@@ -31,11 +31,12 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name, last_name, phone_number, email_add, the_link, index, delay):
+    def __init__(self, name, melli_name, phone_number, email_add, hessab, the_link, index, delay):
         self.name = name
-        self.last_name = last_name
+        self.melli = melli_name
         self.phone_number = phone_number
         self.email_add = email_add
+        self.hessab = hessab
         self.the_link = the_link
         self.index = index
         self.delay = delay
@@ -84,6 +85,7 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-lightbox-close')))
                     break
                 except TimeoutException:
+                    print("timeout 96")
                     continue
             try:
                 second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
@@ -177,24 +179,22 @@ class MainProcess:
                 except NoSuchElementException:
                     continue
 
-            random_notes = ["عالی بود",
-                            "خوب بود",
-                            "دوست داشتم",
-                            "سرعت سایت یکم پایینه",
-                            "کم سایت رو عوض کنید", ]
-
-            name_input = self.driver.find_element(By.ID, r'customer_first_name')
-            last_name_input = self.driver.find_element(By.ID, r'customer_last_name')
-            phone_number_input = self.driver.find_element(By.XPATH, r"//input[@type='tel']")
-            email_input = self.driver.find_element(By.ID, r'customer_email')
-            customer_notes = self.driver.find_element(By.TAG_NAME, r'textarea')
-
+            melli_input = self.driver.find_element(By.ID, r'customer_first_name')
+            melli_input.clear()
+            melli_input.send_keys(self.melli)
+            name_input = self.driver.find_element(By.ID, r'customer_last_name')
+            name_input.clear()
             name_input.send_keys(self.name)
-            last_name_input.send_keys(self.last_name)
+            phone_number_input = self.driver.find_element(By.ID, r"customer_phone")
+            phone_number_input.clear()
             phone_number_input.send_keys(self.phone_number)
+            email_input = self.driver.find_element(By.ID, r'customer_email')
+            email_input.clear()
             email_input.send_keys(self.email_add)
-            random_note = choice(random_notes)
-            customer_notes.send_keys(random_note)
+            if self.the_link == ARYA_LINK:
+                hessab_input = self.driver.find_element(By.ID, r'customer_notes')
+                hessab_input.clear()
+                hessab_input.send_keys(self.hessab)
 
             while True:
                 try:
@@ -206,11 +206,13 @@ class MainProcess:
                     break
                 except Exception:
                     raise NoSuchWindowException
-
-            self.fifth_step()
+            if self.the_link == ARYA_LINK:
+                self.fifth_step()
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
+        except Exception as e:
+            messagebox.showerror(e)
 
     def fifth_step(self):
         try:
@@ -227,25 +229,6 @@ class MainProcess:
                     next_button.click()
                 except NoSuchElementException:
                     break
-            try:
-                self.wait.until(ec.invisibility_of_element((By.CLASS_NAME, r'latepoint-next-btn')))
-            except Exception:
-                pass
-            # sale_id = str(uuid.uuid4())
-            #
-            # # Get the current date and time
-            # sale_time = datetime.now()
-            #
-            # # Create the sale info document
-            # sale_info = {
-            #     "_id": sale_id,
-            #     "time": sale_time
-            # }
-            #
-            # # Insert the sale info into the 'sales' collection
-            # sale_collection = db["sales"]
-            # sale_collection.insert_one(sale_info)
-
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
@@ -308,11 +291,11 @@ def get_all_the_info():
             widget.destroy()
         phone_number_func = window.register(validate_phone_number)
 
-        name_label = tk.Label(text=":نام ", padx=10, pady=10, justify="right")
+        name_label = tk.Label(text=":نام و نام خانوادگی", padx=10, pady=10, justify="right")
         name_label.grid(row=1, column=amount + 1)
 
-        last_name_label = tk.Label(text=":نام خانوادگی ", padx=10, pady=10, justify="right")
-        last_name_label.grid(row=2, column=amount + 1)
+        melli_label = tk.Label(text=":کد ملی ", padx=10, pady=10, justify="right")
+        melli_label.grid(row=2, column=amount + 1)
 
         phone_number_label = tk.Label(text=":شماره موبایل", padx=10, pady=10, justify="right")
         phone_number_label.grid(row=3, column=amount + 1)
@@ -320,7 +303,11 @@ def get_all_the_info():
         email_label = tk.Label(text=":ایمیل ", padx=10, pady=10, justify="left")
         email_label.grid(row=4, column=amount + 1)
 
-        help_button_2 = tk.Button(window, text="کمک", image=photo, width=16,
+        hessab_label = tk.Label(text=":شماره حساب", padx=10, pady=10, justify="right")
+        if the_link == ARYA_LINK:
+            hessab_label.grid(row=5, column=amount + 1)
+
+        help_button_2 = tk.Button(window, text="کمک", image=photo, width=5,
                                   command=lambda: show_help(2))
         help_button_2.grid(row=0, column=amount + 1)
 
@@ -331,8 +318,8 @@ def get_all_the_info():
             name_entry = tk.Entry(width=20, justify="right")
             name_entry.grid(row=1, column=i)
 
-            last_name_entry = tk.Entry(width=20, justify="right")
-            last_name_entry.grid(row=2, column=i)
+            melli_entry = tk.Entry(width=20, justify="right")
+            melli_entry.grid(row=2, column=i)
 
             phone_number_entry = tk.Entry(width=20, validate="focus", validatecommand=(phone_number_func, '%P'))
             phone_number_entry.grid(row=3, column=i)
@@ -340,13 +327,18 @@ def get_all_the_info():
             email_entry = tk.Entry(width=20, justify="left")
             email_entry.grid(row=4, column=i)
 
+            hessab_entry = tk.Entry(width=20, justify="left")
+            if the_link == ARYA_LINK:
+                hessab_entry.grid(row=5, column=i)
+
             all_info.append(
-                (name_entry, last_name_entry, phone_number_entry, email_entry))
+                (name_entry, melli_entry, phone_number_entry, email_entry, hessab_entry))
 
         start_button = tk.Button(text="شروع", width=20,
-                                 command=lambda: iterate_through(all_info, link=the_link, delay_t=float(delay_time)))
+                                 command=lambda: iterate_through(all_info, link=the_link,
+                                                                 delay_t=float(delay_time)))
         start_button.config(padx=10, pady=10)
-        start_button.grid(row=5, column=0, columnspan=amount + 1)
+        start_button.grid(row=6, column=0, columnspan=amount + 1)
 
 
 def iterate_through(information: list, link: str, delay_t: float):
@@ -360,14 +352,14 @@ def iterate_through(information: list, link: str, delay_t: float):
     i = 1
     information.reverse()
     processes = []
-    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get()]
+    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get()]
                         for info in information]
     for info in user_information:
         if not validate_phone_number(info[2]):
             messagebox.showerror(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
         p = multiprocessing.Process(target=MainProcess,
-                                    args=(info[0], info[1], info[2], info[3], link, i, delay_t))
+                                    args=(info[0], info[1], info[2], info[3], info[4], link, i, delay_t))
         p.start()
         processes.append(p)
         i += 1
