@@ -11,7 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, NoSuchWindowException, \
-    ElementNotInteractableException, StaleElementReferenceException, ElementClickInterceptedException
+    ElementNotInteractableException, ElementClickInterceptedException
 import tkinter as tk
 from tkinter import messagebox
 from random import choice, randint
@@ -31,12 +31,13 @@ class MainProcess:
     the main class does everything
     """
 
-    def __init__(self, name, melli_name, phone_number, email_add, hessab, the_link, index, delay):
+    def __init__(self, name, melli, phone_number, email_add, hessab, birthdate, the_link, index, delay):
         self.name = name
-        self.melli = melli_name
+        self.melli = melli
         self.phone_number = phone_number
         self.email_add = email_add
         self.hessab = hessab
+        self.birthdate = birthdate
         self.the_link = the_link
         self.index = index
         self.delay = delay
@@ -85,7 +86,6 @@ class MainProcess:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-lightbox-close')))
                     break
                 except TimeoutException:
-                    print("timeout 96")
                     continue
             try:
                 second_button = self.driver.find_element(By.CLASS_NAME, r'os-service-selector')
@@ -104,10 +104,36 @@ class MainProcess:
         try:
             while True:
                 try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, "os-form-control")))
+                    break
+                except TimeoutException:
+                    continue
+            checkbox = self.driver.find_element(By.CLASS_NAME, "os-form-checkbox")
+            if not checkbox.is_selected():
+                checkbox.click()
+            birth_input = self.driver.find_element(By.CLASS_NAME, "os-form-control")
+            if birth_input.get_attribute("value") == "":
+                birth_input.send_keys(self.birthdate)
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
+                    break
+                except TimeoutException:
+                    continue
+            next_button = self.driver.find_element(By.CLASS_NAME, "latepoint-next-btn")
+            next_button.click()
+            self.fourth_step()
+        except NoSuchWindowException:
+            messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def fourth_step(self):
+        try:
+            while True:
+                try:
                     self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
                     break
                 except TimeoutException:
-                    print("timeout 116")
                     continue
             today_date = datetime.today().strftime('%Y-%m-%d')
             tomorrow_date = (datetime.today() + timedelta(1)).strftime('%Y-%m-%d')
@@ -136,7 +162,7 @@ class MainProcess:
                     days_available.append(day)
             if not days_available:
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
-                self.second_step()
+                self.third_step()
             winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
@@ -162,13 +188,13 @@ class MainProcess:
 
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
             next_button.click()
-            self.fourth_step()
+            self.fifth_step()
 
         except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-    def fourth_step(self):
+    def fifth_step(self):
         try:
             while True:
                 try:
@@ -207,14 +233,14 @@ class MainProcess:
                 except Exception:
                     raise NoSuchWindowException
             if self.the_link == ARYA_LINK:
-                self.fifth_step()
+                self.sixth_step()
         except NoSuchWindowException:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
         except Exception as e:
             messagebox.showerror(e)
 
-    def fifth_step(self):
+    def sixth_step(self):
         try:
             while True:
                 try:
@@ -233,7 +259,6 @@ class MainProcess:
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
-
 def validate_phone_number(x) -> bool:
     """Validates that the input is a phone number"""
     if x.isdigit() and len(x) == 11:
@@ -242,7 +267,6 @@ def validate_phone_number(x) -> bool:
         return True
     else:
         return False
-
 
 def validate_number(x) -> bool:
     """Validates that the input is a number and is within the accepted range"""
@@ -253,14 +277,12 @@ def validate_number(x) -> bool:
     else:
         return False
 
-
 def validate_delay(x) -> bool:
     """validates that the input is a number and is not a negative number"""
     if x.isdigit() and int(x) >= 0:
         return True
     else:
         return False
-
 
 def get_all_the_info():
     """
@@ -303,12 +325,15 @@ def get_all_the_info():
         email_label = tk.Label(text=":ایمیل ", padx=10, pady=10, justify="left")
         email_label.grid(row=4, column=amount + 1)
 
-        hessab_label = tk.Label(text=":شماره حساب", padx=10, pady=10, justify="right")
+        hessab_label = tk.Label(text=":شماره حساب ", padx=10, pady=10, justify="right")
         if the_link == ARYA_LINK:
             hessab_label.grid(row=5, column=amount + 1)
 
+        birthdate_label = tk.Label(text=":تاریخ تولد ", padx=10, pady=10, justify="right")
+        birthdate_label.grid(row=6, column=amount + 1)
+
         help_button_2 = tk.Button(window, text="کمک", image=photo, width=16,
-                                  command=lambda: show_help(2))
+                                   command=lambda: show_help(2))
         help_button_2.grid(row=0, column=amount + 1)
 
         for i in range(amount):
@@ -331,15 +356,17 @@ def get_all_the_info():
             if the_link == ARYA_LINK:
                 hessab_entry.grid(row=5, column=i)
 
+            birthdate_entry = tk.Entry(width=20, justify="left")
+            birthdate_entry.grid(row=6, column=i)
+
             all_info.append(
-                (name_entry, melli_entry, phone_number_entry, email_entry, hessab_entry))
+                (name_entry, melli_entry, phone_number_entry, email_entry, hessab_entry, birthdate_entry))
 
         start_button = tk.Button(text="شروع", width=20,
-                                 command=lambda: iterate_through(all_info, link=the_link,
-                                                                 delay_t=float(delay_time)))
+                                  command=lambda: iterate_through(all_info, link=the_link,
+                                                                  delay_t=float(delay_time)))
         start_button.config(padx=10, pady=10)
-        start_button.grid(row=6, column=0, columnspan=amount + 1)
-
+        start_button.grid(row=7, column=0, columnspan=amount + 1)
 
 def iterate_through(information: list, link: str, delay_t: float):
     """
@@ -352,14 +379,14 @@ def iterate_through(information: list, link: str, delay_t: float):
     i = 1
     information.reverse()
     processes = []
-    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get()]
+    user_information = [[info[0].get(), info[1].get(), info[2].get(), info[3].get(), info[4].get(), info[5].get()]
                         for info in information]
     for info in user_information:
         if not validate_phone_number(info[2]):
             messagebox.showerror(message="یکی از شماره موبایل ها اشتباه است", title=f'ارور')
             sys.exit()
         p = multiprocessing.Process(target=MainProcess,
-                                    args=(info[0], info[1], info[2], info[3], info[4], link, i, delay_t))
+                                    args=(info[0], info[1], info[2], info[3], info[4], info[5], link, i, delay_t))
         p.start()
         processes.append(p)
         i += 1
