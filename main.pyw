@@ -52,7 +52,7 @@ class MainProcess:
         self.driver = webdriver.Chrome(options=option, service=ser)
         self.wait = WebDriverWait(self.driver, 20)
         # self.driver.maximize_window()
-        self.fourth_step()
+        self.first_step()
 
     def open_url(self):
         """opens the link in a separate process, this is done to bypass any kind of anti-bot measure"""
@@ -170,10 +170,6 @@ class MainProcess:
 
     def fourth_step(self):
         try:
-            self.driver.get(
-                r'file:///C:/Users/moham/Downloads/Telegram%20Desktop/%D9%88%D8%A8%20%D8%B3%D8%A7%DB%8C%D8%AA%20%D8'
-                r'%B1%D8%B3%D9%85%DB%8C%20%D8%B5%D8%B1%D8%A7%D9%81%DB%8C%20%D8%AF%D9%88%D9%84%D8%AE%D8%A7%D9%86%DB%8C'
-                r'.html')
             while True:
                 try:
                     self.wait.until(ec.presence_of_element_located((By.XPATH, r"//input[@type='tel']")))
