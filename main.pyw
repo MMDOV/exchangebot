@@ -194,31 +194,35 @@ class MainProcess:
             sys.exit()
 
     def time_step(self):
-        while True:
-            try:
-                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
-                break
-            except TimeoutException:
-                continue
-        hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
-        times_available = []
-        for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
-            if 'is-booked' not in time.get_attribute('class').split(' '):
-                times_available.append(time)
-        if not times_available:
-            Messagebox.show_error(message="وقتی موجود نمیباشد!", title="ارور")
-        choice(times_available).click()
+        try:
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
+                    break
+                except TimeoutException:
+                    continue
+            hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
+            times_available = []
+            for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
+                if 'is-booked' not in time.get_attribute('class').split(' '):
+                    times_available.append(time)
+            if not times_available:
+                Messagebox.show_error(message="وقتی موجود نمیباشد!", title="ارور")
+            choice(times_available).click()
 
-        while True:
-            try:
-                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
-                break
-            except TimeoutException:
-                continue
+            while True:
+                try:
+                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
+                    break
+                except TimeoutException:
+                    continue
 
-        next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
-        next_button.click()
-        self.fifth_step()
+            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+            next_button.click()
+            self.fifth_step()
+        except (NoSuchWindowException, AttributeError):
+            Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
 
     def fifth_step(self):
         try:
