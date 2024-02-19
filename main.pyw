@@ -75,7 +75,7 @@ class MainProcess:
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
                 self.first_step()
             self.second_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
@@ -96,7 +96,7 @@ class MainProcess:
                 close_button.click()
                 self.first_step()
             self.third_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
@@ -123,7 +123,7 @@ class MainProcess:
             next_button = self.driver.find_element(By.CLASS_NAME, "latepoint-next-btn")
             next_button.click()
             self.fourth_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
@@ -135,35 +135,66 @@ class MainProcess:
                     break
                 except TimeoutException:
                     continue
+            days_available = []
+
             today_date = datetime.today().strftime('%Y-%m-%d')
             tomorrow_date = (datetime.today() + timedelta(1)).strftime('%Y-%m-%d')
             overmorrow_date = (datetime.today() + timedelta(2)).strftime('%Y-%m-%d')
             today = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{today_date}']")
+            if 'os-not-available' not in today.get_attribute('class').split(' '):
+                days_available.append(today)
+                self.wait.until(ec.element_to_be_clickable(today))
+                today.click()
+                self.time_step()
+
             try:
                 tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
+                if 'os-not-available' not in tomorrow.get_attribute('class').split(' '):
+                    days_available.append(tomorrow)
+                    self.wait.until(ec.element_to_be_clickable(tomorrow))
+                    tomorrow.click()
+                    self.time_step()
                 overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
+                if 'os-not-available' not in overmorrow.get_attribute('class').split(' '):
+                    days_available.append(overmorrow)
+                    self.wait.until(ec.element_to_be_clickable(overmorrow))
+                    overmorrow.click()
+                    self.time_step()
             except NoSuchElementException:
                 self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
                 tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
+                if 'os-not-available' not in tomorrow.get_attribute('class').split(' '):
+                    days_available.append(tomorrow)
+                    self.wait.until(ec.element_to_be_clickable(tomorrow))
+                    tomorrow.click()
+                    self.time_step()
                 overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
+                if 'os-not-available' not in overmorrow.get_attribute('class').split(' '):
+                    days_available.append(overmorrow)
+                    self.wait.until(ec.element_to_be_clickable(overmorrow))
+                    overmorrow.click()
+                    self.time_step()
             days = [today, tomorrow, overmorrow]
-            days_available = []
             self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
             for day in days:
                 try:
                     if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
                             today.find_element(By.CLASS_NAME, r'os-day-number').text):
                         self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                        break
                 except TypeError:
                     pass
-                if 'os-not-available' not in day.get_attribute('class').split(' '):
-                    self.wait.until(ec.element_to_be_clickable(day))
-                    day.click()
-                    days_available.append(day)
             if not days_available:
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
                 self.third_step()
             winsound.PlaySound('*', winsound.SND_ASYNC)
+
+        except (NoSuchWindowException, AttributeError):
+            messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
+            sys.exit()
+
+    def time_step(self):
+        try:
             while True:
                 try:
                     self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
@@ -189,7 +220,6 @@ class MainProcess:
             next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
             next_button.click()
             self.fifth_step()
-
         except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
@@ -234,7 +264,7 @@ class MainProcess:
                     raise NoSuchWindowException
             if self.the_link == ARYA_LINK:
                 self.sixth_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
         except Exception as e:
@@ -255,9 +285,10 @@ class MainProcess:
                     next_button.click()
                 except NoSuchElementException:
                     break
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             messagebox.showerror(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
+
 
 def validate_phone_number(x) -> bool:
     """Validates that the input is a phone number"""
@@ -268,6 +299,7 @@ def validate_phone_number(x) -> bool:
     else:
         return False
 
+
 def validate_number(x) -> bool:
     """Validates that the input is a number and is within the accepted range"""
     if x.isdigit() and 8 >= int(x) > 0:
@@ -277,12 +309,14 @@ def validate_number(x) -> bool:
     else:
         return False
 
+
 def validate_delay(x) -> bool:
     """validates that the input is a number and is not a negative number"""
     if x.isdigit() and int(x) >= 0:
         return True
     else:
         return False
+
 
 def get_all_the_info():
     """
@@ -333,7 +367,7 @@ def get_all_the_info():
         birthdate_label.grid(row=6, column=amount + 1)
 
         help_button_2 = tk.Button(window, text="کمک", image=photo, width=16,
-                                   command=lambda: show_help(2))
+                                  command=lambda: show_help(2))
         help_button_2.grid(row=0, column=amount + 1)
 
         for i in range(amount):
@@ -363,10 +397,11 @@ def get_all_the_info():
                 (name_entry, melli_entry, phone_number_entry, email_entry, hessab_entry, birthdate_entry))
 
         start_button = tk.Button(text="شروع", width=20,
-                                  command=lambda: iterate_through(all_info, link=the_link,
-                                                                  delay_t=float(delay_time)))
+                                 command=lambda: iterate_through(all_info, link=the_link,
+                                                                 delay_t=float(delay_time)))
         start_button.config(padx=10, pady=10)
         start_button.grid(row=7, column=0, columnspan=amount + 1)
+
 
 def iterate_through(information: list, link: str, delay_t: float):
     """
