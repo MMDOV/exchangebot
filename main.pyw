@@ -75,7 +75,7 @@ class MainProcess:
             if r'os-loading' not in first_button.get_attribute('class').split(' '):
                 self.first_step()
             self.second_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
@@ -96,7 +96,7 @@ class MainProcess:
                 close_button.click()
                 self.first_step()
             self.third_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
@@ -123,7 +123,7 @@ class MainProcess:
             next_button = self.driver.find_element(By.CLASS_NAME, "latepoint-next-btn")
             next_button.click()
             self.fourth_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
@@ -135,34 +135,39 @@ class MainProcess:
                     break
                 except TimeoutException:
                     continue
+            days_available = []
+
             today_date = datetime.today().strftime('%Y-%m-%d')
             tomorrow_date = (datetime.today() + timedelta(1)).strftime('%Y-%m-%d')
             overmorrow_date = (datetime.today() + timedelta(2)).strftime('%Y-%m-%d')
             today = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{today_date}']")
+            if 'os-not-available' not in today.get_attribute('class').split(' '):
+                days_available.append(today)
+                self.wait.until(ec.element_to_be_clickable(today))
+                today.click()
             try:
                 tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
+                if 'os-not-available' not in tomorrow.get_attribute('class').split(' '):
+                    days_available.append(tomorrow)
+                    self.wait.until(ec.element_to_be_clickable(tomorrow))
+                    tomorrow.click()
                 overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
+                if 'os-not-available' not in overmorrow.get_attribute('class').split(' '):
+                    days_available.append(overmorrow)
+                    self.wait.until(ec.element_to_be_clickable(overmorrow))
+                    overmorrow.click()
             except NoSuchElementException:
                 self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
-                tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
-                overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
             days = [today, tomorrow, overmorrow]
-            days_available = []
             self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
             for day in days:
-                try:
-                    if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
-                            today.find_element(By.CLASS_NAME, r'os-day-number').text):
-                        self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
-                except TypeError:
-                    pass
                 if 'os-not-available' not in day.get_attribute('class').split(' '):
-                    self.wait.until(ec.element_to_be_clickable(day))
-                    day.click()
                     days_available.append(day)
             if not days_available:
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
                 self.third_step()
+            else:
+                day = choice(days_available)
             winsound.PlaySound('*', winsound.SND_ASYNC)
             while True:
                 try:
@@ -234,7 +239,7 @@ class MainProcess:
                     raise NoSuchWindowException
             if self.the_link == ARYA_LINK:
                 self.sixth_step()
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
         except Exception as e:
@@ -255,7 +260,7 @@ class MainProcess:
                     next_button.click()
                 except NoSuchElementException:
                     break
-        except NoSuchWindowException:
+        except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
 
