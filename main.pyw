@@ -145,59 +145,80 @@ class MainProcess:
                 days_available.append(today)
                 self.wait.until(ec.element_to_be_clickable(today))
                 today.click()
+                self.time_step()
+
             try:
                 tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
                 if 'os-not-available' not in tomorrow.get_attribute('class').split(' '):
                     days_available.append(tomorrow)
                     self.wait.until(ec.element_to_be_clickable(tomorrow))
                     tomorrow.click()
+                    self.time_step()
                 overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
                 if 'os-not-available' not in overmorrow.get_attribute('class').split(' '):
                     days_available.append(overmorrow)
                     self.wait.until(ec.element_to_be_clickable(overmorrow))
                     overmorrow.click()
+                    self.time_step()
             except NoSuchElementException:
                 self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                tomorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{tomorrow_date}']")
+                if 'os-not-available' not in tomorrow.get_attribute('class').split(' '):
+                    days_available.append(tomorrow)
+                    self.wait.until(ec.element_to_be_clickable(tomorrow))
+                    tomorrow.click()
+                    self.time_step()
+                overmorrow = self.driver.find_element(By.CSS_SELECTOR, f"div[data-date='{overmorrow_date}']")
+                if 'os-not-available' not in overmorrow.get_attribute('class').split(' '):
+                    days_available.append(overmorrow)
+                    self.wait.until(ec.element_to_be_clickable(overmorrow))
+                    overmorrow.click()
+                    self.time_step()
             days = [today, tomorrow, overmorrow]
             self.wait.until(ec.presence_of_element_located((By.CLASS_NAME, r'os-day-number')))
             for day in days:
-                if 'os-not-available' not in day.get_attribute('class').split(' '):
-                    days_available.append(day)
+                try:
+                    if (day.find_element(By.CLASS_NAME, r'os-day-number').text <
+                            today.find_element(By.CLASS_NAME, r'os-day-number').text):
+                        self.driver.find_element(By.CLASS_NAME, r'os-month-next-btn').click()
+                        break
+                except TypeError:
+                    pass
             if not days_available:
                 self.driver.find_element(By.CLASS_NAME, r'latepoint-prev-btn').click()
                 self.third_step()
-            else:
-                day = choice(days_available)
             winsound.PlaySound('*', winsound.SND_ASYNC)
-            while True:
-                try:
-                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
-                    break
-                except TimeoutException:
-                    continue
-            hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
-            times_available = []
-            for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
-                if 'is-booked' not in time.get_attribute('class').split(' '):
-                    times_available.append(time)
-            if not times_available:
-                Messagebox.show_error(message="وقتی موجود نمیباشد!", title="ارور")
-            choice(times_available).click()
-
-            while True:
-                try:
-                    self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
-                    break
-                except TimeoutException:
-                    continue
-
-            next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
-            next_button.click()
-            self.fifth_step()
 
         except (NoSuchWindowException, AttributeError):
             Messagebox.show_error(message="!پنجره مورد نظر بسته شده و یا وجود ندارد", title=f'{self.index} پنجره ')
             sys.exit()
+
+    def time_step(self):
+        while True:
+            try:
+                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'dp-timeslot')))
+                break
+            except TimeoutException:
+                continue
+        hours = self.driver.find_element(By.CLASS_NAME, r'timeslots')
+        times_available = []
+        for time in hours.find_elements(By.CLASS_NAME, r'dp-timeslot'):
+            if 'is-booked' not in time.get_attribute('class').split(' '):
+                times_available.append(time)
+        if not times_available:
+            Messagebox.show_error(message="وقتی موجود نمیباشد!", title="ارور")
+        choice(times_available).click()
+
+        while True:
+            try:
+                self.wait.until(ec.element_to_be_clickable((By.CLASS_NAME, r'latepoint-next-btn')))
+                break
+            except TimeoutException:
+                continue
+
+        next_button = self.driver.find_element(By.CLASS_NAME, r'latepoint-next-btn')
+        next_button.click()
+        self.fifth_step()
 
     def fifth_step(self):
         try:
