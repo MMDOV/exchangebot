@@ -16,14 +16,10 @@ import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from random import choice, randint
 import multiprocessing
+from webdriver_manager.chrome import ChromeDriverManager
 
 DOLKHANI_LINK = r'https://dolkhaniexchange.com'
 ARYA_LINK = r'https://exarya.com'
-route = r'files/chromedriver.exe'
-if getattr(sys, 'frozen', False):
-    WEBDRIVER_PATH = os.path.join(sys._MEIPASS, route)
-else:
-    WEBDRIVER_PATH = route
 
 
 class MainProcess:
@@ -45,12 +41,11 @@ class MainProcess:
         p = multiprocessing.Process(target=self.open_url)
         p.start()
         time.sleep(self.delay)
-        ser = service.Service(executable_path=WEBDRIVER_PATH)
         option = Options()
         # option.add_experimental_option("detach", True)
         option.page_load_strategy = "none"
         option.add_experimental_option("debuggerAddress", f"127.0.0.1:{self.port}")
-        self.driver = webdriver.Chrome(options=option, service=ser)
+        self.driver = webdriver.Chrome(options=option, service=service.Service(ChromeDriverManager().install()))
         self.wait = WebDriverWait(self.driver, 20)
         # self.driver.maximize_window()
         self.first_step()
